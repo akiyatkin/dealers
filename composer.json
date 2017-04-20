@@ -1,0 +1,11 @@
+{
+	"name":"akiyatkin/dealers",
+	"require":{
+		"infrajs/excel":"~1",
+		"infrajs/path":"~1",
+		"infrajs/load":"~1"
+	},
+	"psr-4":{
+ 		"akiyatkin\\dealers\\": ""
+	}
+}
