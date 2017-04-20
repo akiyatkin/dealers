@@ -1,5 +1,5 @@
 <?php
-namespace infrajs\dealers;
+namespace akiyatkin\dealers;
 
 
 class Dealers {

@@ -4,7 +4,7 @@ use infrajs\excel\Xlsx;
 use infrajs\ans\Ans;
 use infrajs\path\Path;
 use infrajs\load\Load;
-use infrajs\dealers\Dealers;
+use akiyatkin\dealers\Dealers;
 
 $ans = array();
 $folder = '~.dealers/';
