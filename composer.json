@@ -5,7 +5,9 @@
 		"infrajs/path":"~1",
 		"infrajs/load":"~1"
 	},
-	"psr-4":{
- 		"akiyatkin\\dealers\\": ""
+	"autoload": {
+		"psr-4":{
+	 		"akiyatkin\\dealers\\": ""
+		}
 	}
 }
