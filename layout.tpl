@@ -2,7 +2,24 @@
 	<h1>Сравнение прайсов и данных каталога</h1>
 	Список прайсов
 	<ul>
-		{list::print}
+		{data::head}
 	</ul>
-{print:}
-	<li><a href="/-dealers/?name={name}">{name}</a></li>
+	
+	{data::body}
+	
+{head:}
+	<li><a href="/-dealers/?name={~key}">{~key}</a></li>
+	
+{body:}
+	<h2>{~key}</h2>
+	<h3>Не добавленные</h3>
+	<ul>
+		{miss::list}
+	</ul>
+	<h3>Не актуальные</h3>
+	<ul>
+		{lose::list}
+	</ul>
+	
+{list:}
+	<li>{?????????????}</li>
