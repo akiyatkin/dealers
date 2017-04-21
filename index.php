@@ -33,6 +33,7 @@ $list = Dealers::getList();
 
 $data = Catalog::init();
 
+
 foreach ($list as $dealer => $info) {
 	if (isset($_GET['name'])) $dealer = $_GET['name'];
 	
@@ -96,4 +97,3 @@ $ans_data = array();
 $ans_data['data'] = $ans;
 
 echo Template::parse('-dealers/layout.tpl', $ans_data);
-exit;
