@@ -28,72 +28,16 @@ Amatek
 
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
 
-$ans = array();
-
-$list = Dealers::getList();
-
-$data = Catalog::init();
-
-
-foreach ($list as $dealer => $info) {
-	if (isset($_GET['name'])) $dealer = $_GET['name'];
-	
-	
-	$price = array();
-	$ans[$dealer] = Array();
-	$poss = array();
-	Xlsx::runPoss($data, function &($pos) use (&$poss, $dealer) {
-		$r = null;
-		if ($pos['Производитель'] != $dealer) return $r;
-		$poss[] = $pos['Артикул'];
-		return $r;
-	});
-	foreach ($info['data']['childs'] as $sheet) {
-		foreach ($sheet['data'] as $pos) {
-			if (isset($pos['Модель']))
-				$price[] = $pos['Модель'];
-		}
-		
+$dealer = Ans::GET('dealer');
+if (!$dealer) {
+	$data = array();
+	$list = Dealers::getList();
+	foreach ($list as $dealer => $info) {	
+		$data[$dealer] = Dealers::init($dealer); 
 	}
-	array_walk($price, array("akiyatkin\dealers\Dealers","clearKey"));
-	array_walk($poss, array("akiyatkin\dealers\Dealers","clearKey"));
-	sort($poss);
-	sort($price);
-	$poss_len = count($poss);
-	$price_len = count($price);
-	$miss = array();
-	$bingo = array();
-	$lose = array();
-	$i = 0;
-	$j = 0;
-	while ($i < $poss_len && $j < $price_len) {
-		$r = strcasecmp($poss[$i], $price[$j]);
-		if ($r == 0) {
-			$bingo[] = $poss[$i];
-			$i++;
-			$j++;
-		} else if ($r < 0) {
-			$lose[] = $poss[$i];
-			$i++;
-		} else if ($r > 0) { 
-			$miss[] = $price[$j];
-			$j++;
-		}
-	}
-	while ($i < $poss_len) {
-			$lose[] = $poss[$i];
-			$i++;
-	}
-	while ($j < $price_len) {
-			$miss[] = $price[$j];
-			$j++;
-	}
-	$ans[$dealer]['bingo'] = $bingo;
-	$ans[$dealer]['miss'] = $miss;
-	$ans[$dealer]['lose'] = $lose;
-	
-	if (isset($_GET['name'])) break;
+	echo Template::parse('-dealers/layout.tpl', array('data' => $data), 'ROOT');
+} else {
+	$rule = Dealers::getRule($dealer);
+	$data = Dealers::init($dealer); 
+	echo Template::parse('-dealers/layout.tpl', array('data' => $data, 'dealer' => $dealer, 'rule' => $rule), 'DEALER');
 }
-
-
-echo Template::parse('-dealers/layout.tpl', array('data' => $ans) );
