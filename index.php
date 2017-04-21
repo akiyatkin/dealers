@@ -37,10 +37,10 @@ $data = Catalog::init();
 foreach ($list as $dealer => $info) {
 	if (isset($_GET['name'])) $dealer = $_GET['name'];
 	
-	$poss = array();
+	
 	$price = array();
 	$ans[$dealer] = Array();
-
+	$poss = array();
 	Xlsx::runPoss($data, function &($pos) use (&$poss, $dealer) {
 		$r = null;
 		if ($pos['Производитель'] != $dealer) return $r;
@@ -59,6 +59,7 @@ foreach ($list as $dealer => $info) {
 	$poss_len = count($poss);
 	$price_len = count($price);
 	$miss = array();
+	$bingo = array();
 	$lose = array();
 	$i = 0;
 	$j = 0;
@@ -69,6 +70,7 @@ foreach ($list as $dealer => $info) {
 		$price[$j] = str_replace(".", ',', $price[$j]);
 		$r = strcasecmp($poss[$i], $price[$j]);
 		if ($r == 0) {
+			$bingo[] = $poss[$i];
 			$i++;
 			$j++;
 		} else if ($r < 0) {
@@ -87,13 +89,12 @@ foreach ($list as $dealer => $info) {
 			$miss[] = $price[$j];
 			$j++;
 	}
+	$ans[$dealer]['bingo'] = $bingo;
 	$ans[$dealer]['miss'] = $miss;
 	$ans[$dealer]['lose'] = $lose;
 	
 	if (isset($_GET['name'])) break;
 }
 
-$ans_data = array();
-$ans_data['data'] = $ans;
 
-echo Template::parse('-dealers/layout.tpl', $ans_data);
+echo Template::parse('-dealers/layout.tpl', array('data' => $ans) );
