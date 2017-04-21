@@ -25,6 +25,10 @@ Amatek
 В формает понятном для клиента.
 
 */
+function clearKey(&$value, $key) {
+	$value = str_replace(["\n","\r"," ", "\t"], '', $value);
+	$value = str_replace(".", ',', $value);
+}
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
 
 $ans = array();
@@ -54,6 +58,14 @@ foreach ($list as $dealer => $info) {
 		}
 		
 	}
+	array_walk($poss, function (&$value, $key) {
+		$value = str_replace(["\n","\r"," ", "\t"], '', $value);
+		$value = str_replace(".", ',', $value);
+	});
+	array_walk($price, function (&$value, $key) {
+		$value = str_replace(["\n","\r"," ", "\t"], '', $value);
+		$value = str_replace(".", ',', $value);
+	});
 	sort($poss);
 	sort($price);
 	$poss_len = count($poss);
@@ -64,10 +76,6 @@ foreach ($list as $dealer => $info) {
 	$i = 0;
 	$j = 0;
 	while ($i < $poss_len && $j < $price_len) {
-		$poss[$i] = str_replace(["\n","\r"," ", "\t"], '', $poss[$i]);
-		$price[$j] = str_replace(["\n","\r"," ", "\t"], '', $price[$j]);
-		$poss[$i] = str_replace(".", ',', $poss[$i]);
-		$price[$j] = str_replace(".", ',', $price[$j]);
 		$r = strcasecmp($poss[$i], $price[$j]);
 		if ($r == 0) {
 			$bingo[] = $poss[$i];
