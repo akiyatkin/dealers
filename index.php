@@ -25,10 +25,7 @@ Amatek
 В формает понятном для клиента.
 
 */
-function clearKey(&$value, $key) {
-	$value = str_replace(["\n","\r"," ", "\t"], '', $value);
-	$value = str_replace(".", ',', $value);
-}
+
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
 
 $ans = array();
@@ -58,14 +55,8 @@ foreach ($list as $dealer => $info) {
 		}
 		
 	}
-	array_walk($poss, function (&$value, $key) {
-		$value = str_replace(["\n","\r"," ", "\t"], '', $value);
-		$value = str_replace(".", ',', $value);
-	});
-	array_walk($price, function (&$value, $key) {
-		$value = str_replace(["\n","\r"," ", "\t"], '', $value);
-		$value = str_replace(".", ',', $value);
-	});
+	array_walk($price, array("akiyatkin\dealers\Dealers","clearKey"));
+	array_walk($poss, array("akiyatkin\dealers\Dealers","clearKey"));
 	sort($poss);
 	sort($price);
 	$poss_len = count($poss);

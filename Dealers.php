@@ -34,6 +34,9 @@ class Dealers {
 		}, scandir(Path::resolve(Dealers::$folder)));
 		return $list;
 	}
+	public static function clearKey(&$value, $key) {
+		$value = str_replace(["\n","\r"," ", "\t"], '', $value);
+	}
 	public static function getData($src)
 	{
 		$fd = Load::srcInfo($src);
