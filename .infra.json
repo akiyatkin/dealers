@@ -1,0 +1,4 @@
+{
+	"dependencies":["index"],
+	"require":"infra.php"
+}

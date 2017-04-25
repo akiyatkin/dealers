@@ -3,6 +3,7 @@
 	"require":{
 		"infrajs/excel":"~1",
 		"infrajs/path":"~1",
+		"infrajs/catalog":"~1",
 		"infrajs/ans":"~1",
 		"infrajs/load":"~1"
 	},

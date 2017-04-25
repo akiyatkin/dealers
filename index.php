@@ -6,6 +6,7 @@ use infrajs\path\Path;
 use infrajs\access\Access;
 use infrajs\template\Template;
 use infrajs\load\Load;
+use infrajs\config\Config;
 use infrajs\catalog\Catalog;
 use akiyatkin\dealers\Dealers;
 
@@ -25,7 +26,6 @@ Amatek
 В формает понятном для клиента.
 
 */
-
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
 
 $dealer = Ans::GET('dealer');
@@ -38,6 +38,21 @@ if (!$dealer) {
 	echo Template::parse('-dealers/layout.tpl', array('data' => $data), 'ROOT');
 } else {
 	$rule = Dealers::getRule($dealer);
-	$data = Dealers::init($dealer); 
-	echo Template::parse('-dealers/layout.tpl', array('data' => $data, 'dealer' => $dealer, 'rule' => $rule), 'DEALER');
+
+	$data = Dealers::init($dealer);
+	$images = Catalog::getIndex(Catalog::$conf['dir'].$dealer.'/images/');
+	foreach ($data['bingo'] as $obj) {
+		if (isset($images[$obj['catalog']['dealerkey']])) unset($images[$obj['catalog']['dealerkey']]);
+	}
+	
+	foreach ($data['lose'] as $obj) { //Только в каталоге
+		if (isset($images[$obj['catalog']['dealerkey']])) unset($images[$obj['catalog']['dealerkey']]);
+	}
+	ksort($images);
+	echo Template::parse('-dealers/layout.tpl', array(
+		'data' => $data, 
+		'images' => $images,
+		'dealer' => $dealer, 
+		'rule' => $rule
+	), 'DEALER');
 }
