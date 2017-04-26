@@ -7,47 +7,66 @@ use infrajs\once\Once;
 use infrajs\load\Load;
 use akiyatkin\dealers\Dealers;
 use infrajs\catalog\Catalog;
+use infrajs\template\Template;
 
 class Dealers {
 	public static $folder = '~.dealers/';
+	/*public static function getKey(&$pos, $name)
+	{
+		//Логика в том что мы умнее производителя и знаем как ему надо называть Артикулы для позиций
+		//И если надо ставим точку там, где производитель ставит запятую. Или добавляем пробел, где пробела нет.
+		//Для сравнения не важно есть пробел или нет.
+		//И вообще все страныые символы убираем и рассчитываем что это не приведёт к совпадению разных артикулов.
+		//Символы могут выглядеть одинакого, но быть разными
+		if (!isset($pos[$name])) return '';
+		return Path::encode($pos[$name]);
+		//return str_replace(["\n","\r"," ", "\t",'.',',','%','(',')','-','‐'], '', $pos[$name]); 
+	}*/
+	public static function getHash(&$pos, $name)
+	{
+		$hash = Template::parse(array($name),$pos);
+		return $hash;
+	}
 	public static function init($dealer) 
 	{
-		$list = Dealers::getList();
+		
 		$data = Catalog::init();
 
-		$info = $list[$dealer];
+		
 		$rule = Dealers::getRule($dealer);
-		//$images = Catalog::getIndex(Catalog::$conf['dir'].$dealer.'/images/');
 		$poss = array();
 		Xlsx::runPoss($data, function &($pos) use (&$poss, $dealer, $rule) {
 			$r = null;
 			if ($pos['Производитель'] != $dealer) return $r;
+			
 			$name = $rule['catalog'];
-			if (empty($pos[$name])) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
-			$pos['dealerorig'] = $pos[$name];
-			$pos['dealerkey'] = Dealers::getKey($pos, $name);
+			$pos['dealerkey'] = Dealers::getHash($pos, $name);
+
+			if (!$pos['dealerkey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
+			
 			$pos = Catalog::getPos($pos);
 			$poss[] = $pos;
 			return $r;
 		});
 
 		$price = array();
-		Xlsx::runPoss($info['data'], function &(&$pos) use (&$price, $rule) {
-			$r = null;
-			$name = $rule['price'];
-			if (empty($pos[$name])) return $r;
-			$pos['dealerorig'] = $pos[$name];
-			$pos['dealerkey'] = Dealers::getKey($pos, $name);
-			$price[] = $pos;
-			return $r;
-		});
+
+		$list = Dealers::getList();
+		$info = $list[$dealer];
+		if ($info) {
+			Xlsx::runPoss($info['data'], function &(&$pos) use (&$price, $rule) {
+				$r = null;
+				$name = $rule['price'];
+				$pos['dealerkey'] = Dealers::getHash($pos, $name);
+				if (!$pos['dealerkey']) return $r;
+				
+				$price[] = $pos;
+				return $r;
+			});
+		}
 		
-		
-		//array_walk($price, array("akiyatkin\dealers\Dealers","clearKey"), $rule['price']);
-		//array_walk($poss, array("akiyatkin\dealers\Dealers","clearKey"), $rule['catalog']);
 
 		usort($price, array("akiyatkin\dealers\Dealers","usort"));
-
 		usort($poss, array("akiyatkin\dealers\Dealers","usort"));
 		
 
@@ -118,7 +137,7 @@ class Dealers {
 				$file = Path::toutf($file);
 				$fd = Load::nameInfo($file);
 
-				if (!in_array($fd['ext'], array('xlsx','xls'))) return;
+				if (!in_array($fd['ext'], array('xlsx'))) return;
 				
 				//Данные из прайса Дилера
 				$fd['data'] = Dealers::getData($folder.$file);
@@ -127,6 +146,30 @@ class Dealers {
 				$list[$name] = $fd;
 
 			}, scandir(Path::resolve(Dealers::$folder)));
+			
+			/*$start = 0;
+			$count = 100;
+			$args = array($start, $count);
+			$prods = Catalog::cache('producers.php', function ($start, $count) {
+				$ans=array();
+
+				$data=Catalog::init();
+				$prods=array();
+				Xlsx::runPoss($data, function &(&$pos) use (&$prods) {
+					if (empty($prods[$pos['producer']])) $prods[$pos['producer']] = 0;
+					$prods[$pos['producer']]++;
+					$r = null; return $r;
+				});
+				arsort($prods, SORT_NUMERIC);
+				$prods=array_slice($prods, $start, $count);
+				return $prods;
+			},$args,isset($_GET['re']));
+
+			foreach($prods as $name => $count) {
+				if (isset($list[$name])) continue;
+				$list[$name] = Load::nameInfo($name);
+				$list[$name]['data'] = array();
+			}*/
 			return $list;
 		});
 		
@@ -136,34 +179,14 @@ class Dealers {
 		$rules = Load::loadJSON('~dealers.json');
 		$rule = isset($rules[$name])? $rules[$name]: array();
 
-		if (!isset($rule['start'])) $rule['start'] = 4;
+		if (!isset($rule['start'])) $rule['start'] = 1;
 		if (!isset($rule['ignore'])) $rule['ignore'] = [];
-		if (!isset($rule['price'])) $rule['price'] = 'Артикул';
-		if (!isset($rule['catalog'])) $rule['catalog'] = 'Артикул';
+		if (!isset($rule['price'])) $rule['price'] = '{Артикул}';
+		if (!isset($rule['catalog'])) $rule['catalog'] = '{Артикул}';
 
 		return $rule;
 	}
-	public static function getKey (&$pos, $name)
-	{
-		//Логика в том что мы умнее производителя и знаем как ему надо называть Артикулы для позиций
-		//И если надо ставим точку там, где производитель ставит запятую. Или добавляем пробел, где пробела нет.
-		//Для сравнения не важно есть пробел или нет.
-		//И вообще все страныые символы убираем и рассчитываем что это не приведёт к совпадению разных артикулов.
-		//Символы могут выглядеть одинакого, но быть разными
-		if (!isset($pos[$name])) return '';
-		return Path::encode($pos[$name]);
-		//return str_replace(["\n","\r"," ", "\t",'.',',','%','(',')','-','‐'], '', $pos[$name]); 
-	}
-	public static function initKey (&$pos, $name)
-	{
-		if (empty($pos[$name])) $pos[$name] = false;
-		$pos['dealerorig'] = $pos[$name];
-		$pos['dealerkey'] = Dealers::getKey($pos, $name);
-	}
-	public static function clearKey(&$pos, $key, $name) 
-	{
-		Dealers::initKey($pos, $name);
-	}
+
 	public static function usort(&$a, $b) 
 	{
 		$val = strcasecmp($a['dealerkey'], $b['dealerkey']);

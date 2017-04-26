@@ -6,6 +6,7 @@ use infrajs\path\Path;
 use infrajs\access\Access;
 use infrajs\template\Template;
 use infrajs\load\Load;
+use infrajs\each\Each;
 use infrajs\config\Config;
 use infrajs\catalog\Catalog;
 use akiyatkin\dealers\Dealers;
@@ -27,7 +28,7 @@ Amatek
 
 */
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
-
+$ans = array();
 $dealer = Ans::GET('dealer');
 if (!$dealer) {
 	$data = array();
@@ -38,21 +39,41 @@ if (!$dealer) {
 	echo Template::parse('-dealers/layout.tpl', array('data' => $data), 'ROOT');
 } else {
 	$rule = Dealers::getRule($dealer);
+	if (isset($_GET['show'])) {
+		$list = Dealers::getList();
+		$info = $list[$dealer];	
+		$data = array();
+		Each::exec($info['data']['childs'], function &($group) use (&$data){
 
-	$data = Dealers::init($dealer);
-	$images = Catalog::getIndex(Catalog::$conf['dir'].$dealer.'/images/');
-	foreach ($data['bingo'] as $obj) {
-		if (isset($images[$obj['catalog']['dealerkey']])) unset($images[$obj['catalog']['dealerkey']]);
+			$r = null;
+			$data[$group['title']] = $group['head'];
+			return $r;
+		});
+		echo Template::parse('-dealers/layout.tpl', array(
+			'data' => $data, 
+			'dealer' => $dealer, 
+			'rule' => $rule
+		), 'SHOW');
+	} else {
+		if (!$rule) return Ans::err($ans,'Дилер не зарегистрирован в ~dealers.json');
+		$data = Dealers::init($dealer);
+
+		$images = Catalog::getIndex(Catalog::$conf['dir'].$dealer.'/images/');
+		foreach ($data['bingo'] as $obj) {
+			if (isset($images[$obj['catalog']['article']])) unset($images[$obj['catalog']['article']]);
+			if (isset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']])) unset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']]);
+		}
+		
+		foreach ($data['lose'] as $obj) { //Только в каталоге
+			if (isset($images[$obj['catalog']['article']])) unset($images[$obj['catalog']['article']]);
+			if (isset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']])) unset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']]);
+		}
+		ksort($images);
+		echo Template::parse('-dealers/layout.tpl', array(
+			'data' => $data, 
+			'images' => $images,
+			'dealer' => $dealer, 
+			'rule' => $rule
+		), 'DEALER');
 	}
-	
-	foreach ($data['lose'] as $obj) { //Только в каталоге
-		if (isset($images[$obj['catalog']['dealerkey']])) unset($images[$obj['catalog']['dealerkey']]);
-	}
-	ksort($images);
-	echo Template::parse('-dealers/layout.tpl', array(
-		'data' => $data, 
-		'images' => $images,
-		'dealer' => $dealer, 
-		'rule' => $rule
-	), 'DEALER');
 }

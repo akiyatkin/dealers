@@ -2,8 +2,7 @@
 use infrajs\event\Event;
 use akiyatkin\dealers\Dealers;
 use infrajs\excel\Xlsx;
-
-
+use infrajs\path\Path;
 
 
 Event::handler('Catalog.oninit', function (&$data) {
@@ -17,7 +16,7 @@ Event::handler('Catalog.oninit', function (&$data) {
 		};
 
 		Xlsx::runPoss($info['data'], function &(&$pos) use (&$ids, $rule, $dealer) {
-			$key = Dealers::getKey($pos, $rule['price']);
+			$key = Dealers::getHash($pos, $rule['price']);
 			$id = $dealer.' '.$key;
 			$ids[$id] = $pos;
 			$r = null;
@@ -29,7 +28,7 @@ Event::handler('Catalog.oninit', function (&$data) {
 		$r = null;
 		$dealer = $pos['producer'];
 		$rule = Dealers::getRule($dealer);
-		$key = Dealers::getKey($pos, $rule['catalog']);
+		$key = Dealers::getHash($pos, $rule['catalog']);
 		$id = $dealer.' '.$key;
 		if (empty($ids[$id])) return $r;	
 		$data = array(
@@ -41,3 +40,4 @@ Event::handler('Catalog.oninit', function (&$data) {
 		return $r;
 	});
 }, 'dealers');
+Path::reqif('~dealers.php');
