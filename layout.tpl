@@ -55,7 +55,7 @@
 		{list-miss:}
 			<li>{price.dealerorig}</li>
 		{list-lose:}
-			<tr><td><a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a><br>{catalog.images::image}</td><td>{catalog.dealerorig}</td><td>-</td></tr>
+			<tr><td><a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a><br>{catalog.images::image}</td><td>{catalog.dealerorig}</td><td>{catalog.dealerkey}</td></tr>
 		{list-bingo:}
 			<tr><td><a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a><br>{catalog.images::image}</td><td>{catalog.dealerorig}</td><td>{price.dealerorig}</td><td>{price.dealerkey}</td></tr>
 		{image:}
