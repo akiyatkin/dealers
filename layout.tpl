@@ -36,7 +36,7 @@
 		<h2>Ошибки каталога</h2>
 		<i>Найдены позиции только в каталоге - <b>{~length(lose)}</b></i>
 		<table class="table table-striped">
-			<tr><th>Каталог</th><th>Ключ Каталога</th><th>Ключ Прайса</th></tr>
+			<tr><th>Каталог</th><th>Ключ Каталога</th><th>Хэш</th></tr>
 			{lose::list-lose}
 		</table>
 
