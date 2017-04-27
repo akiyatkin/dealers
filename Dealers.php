@@ -66,8 +66,8 @@ class Dealers {
 		}
 		
 
-		usort($price, array("akiyatkin\dealers\Dealers","usort"));
-		usort($poss, array("akiyatkin\dealers\Dealers","usort"));
+		//usort($price, array("akiyatkin\dealers\Dealers","usort"));
+		//usort($poss, array("akiyatkin\dealers\Dealers","usort"));
 		
 
 		$poss_len = count($poss);
@@ -187,12 +187,12 @@ class Dealers {
 		return $rule;
 	}
 
-	public static function usort(&$a, $b) 
+	/*public static function usort(&$a, $b) 
 	{
 		$val = strcasecmp($a['dealerkey'], $b['dealerkey']);
 		if ($val == 0) return 0;
 		return $val > 0 ? 1 : -1;
-	}
+	}*/
 	public static function getData($src)
 	{
 		$fd = Load::srcInfo($src);
