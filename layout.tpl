@@ -21,17 +21,17 @@
 	</ul>
 	{:/doc}
 {head:}
-	<li><a href="/-dealers/?dealer={~key}">{~key}</a><br>
+	<li><a href="/-prices/?price={~key}">{~key}</a><br>
 		<i>Ошибки - прайс: <b>{~length(miss)}</b>, каталог: <b>{~length(lose)}</b>. Совпадения: <b>{~length(bingo)}</b></i>
 	</li>
-{DEALER:}
+{PRICE:}
 	{:doc}
 	<ul class="breadcrumb">
-		<li><a href="/-dealers/">Список прайсов</a></li>
-		<li class="active">Анализ {dealer}</li>
-		<li><a href="/-dealers/?dealer={dealer}&show">Проверка шапки</a></li>
+		<li><a href="/-prices/">Список прайсов</a></li>
+		<li class="active">Анализ {price}</li>
+		<li><a href="/-prices/?price={price}&show">Проверка шапки</a></li>
 	</ul>
-	<h1>Прайс {dealer}</h1>
+	<h1>Прайс {price}</h1>
 	{data:body}
 	{:/doc}
 	{body:}
@@ -58,7 +58,7 @@
 			{miss::list-miss}
 		</ul>
 		{list-miss:}
-			<li>{price.dealerkey}</li>
+			<li>{price.pricekey}</li>
 	{showcaterror:}
 		<h2>Ошибки каталога</h2>
 		<i>Найдены позиции только в каталоге - <b>{~length(lose)}</b></i>
@@ -68,7 +68,7 @@
 		</table>
 		{list-lose:}
 			<tr><td><a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a><br>{catalog.images::image}</td>
-			<td class="danger">{catalog.dealerkey}</td></tr>
+			<td class="danger">{catalog.pricekey}</td></tr>
 	{showbingo:}
 		<h2>Совпадения</h2>
 		<i>Найдны позиции и в прайсе, и в каталоге - <b>{~length(bingo)}</b></i>
@@ -79,15 +79,15 @@
 		{list-bingo:}
 			<tr><td><a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a>
 			<br>{catalog.images::image}</td>
-			<td class="success">{price.dealerkey}</td></tr>
+			<td class="success">{price.pricekey}</td></tr>
 {SHOW:}
 	{:doc}
 	<ul class="breadcrumb">
-		<li><a href="/-dealers/">Список прайсов</a></li>
-		<li><a href="/-dealers/?dealer={dealer}">Анализ {dealer}</a></li>
+		<li><a href="/-prices/">Список прайсов</a></li>
+		<li><a href="/-prices/?price={price}">Анализ {price}</a></li>
 		<li class="active">Проверка шапки</li>
 	</ul>
-	<h1>Шапка прайса {dealer}</h1>
+	<h1>Шапка прайса {price}</h1>
 	<div>Поиск в прайсе: <b>{rule.price}</b></div>
 	<div>Поиск в каталоге: <b>{rule.catalog}</b></div>
 	{data::exlist}
