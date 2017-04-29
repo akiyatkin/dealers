@@ -1,22 +1,22 @@
 <?php
 use infrajs\event\Event;
-use akiyatkin\dealers\Dealers;
+use akiyatkin\prices\Prices;
 use infrajs\excel\Xlsx;
 use infrajs\path\Path;
 
 
 Event::handler('Catalog.oninit', function (&$data) {
 
-	$list = Dealers::getList();
+	$list = Prices::getList();
 	$ids = array();
 	foreach ($list as $dealer => $info) {	
-		$rule = Dealers::getRule($dealer);
-		Event::$classes['Dealers-'.$dealer] = function (&$obj) {
+		$rule = Prices::getRule($dealer);
+		Event::$classes['Prices-'.$dealer] = function (&$obj) {
 			return $obj['key'];
 		};
 
 		Xlsx::runPoss($info['data'], function &(&$pos) use (&$ids, $rule, $dealer) {
-			$key = Dealers::getHash($pos, $rule['price']);
+			$key = Prices::getHash($pos, $rule['price']);
 			$id = $dealer.' '.$key;
 			$ids[$id] = $pos;
 			$r = null;
@@ -27,8 +27,8 @@ Event::handler('Catalog.oninit', function (&$data) {
 	Xlsx::runPoss($data, function &(&$pos) use ($ids) {
 		$r = null;
 		$dealer = $pos['producer'];
-		$rule = Dealers::getRule($dealer);
-		$key = Dealers::getHash($pos, $rule['catalog']);
+		$rule = Prices::getRule($dealer);
+		$key = Prices::getHash($pos, $rule['catalog']);
 		$id = $dealer.' '.$key;
 		if (empty($ids[$id])) return $r;	
 		$data = array(
@@ -36,8 +36,8 @@ Event::handler('Catalog.oninit', function (&$data) {
 			'price' => $ids[$id],
 			'pos' => &$pos
 		);
-		Event::fire('Dealers-'.$dealer.'.oninit', $data);
+		Event::fire('Prices-'.$dealer.'.oninit', $data);
 		return $r;
 	});
-}, 'dealers');
-Path::reqif('~dealers.php');
+}, 'prices');
+Path::reqif('~prices.php');
