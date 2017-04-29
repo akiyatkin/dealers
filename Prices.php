@@ -39,9 +39,9 @@ class Prices {
 			if ($pos['Производитель'] != $dealer) return $r;
 			
 			$name = $rule['catalog'];
-			$pos['dealerkey'] = Prices::getHash($pos, $name);
+			$pos['pricekey'] = Prices::getHash($pos, $name);
 
-			if (!$pos['dealerkey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
+			if (!$pos['pricekey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
 			
 			$pos = Catalog::getPos($pos);
 			$poss[] = $pos;
@@ -56,8 +56,8 @@ class Prices {
 			Xlsx::runPoss($info['data'], function &(&$pos) use (&$price, $rule) {
 				$r = null;
 				$name = $rule['price'];
-				$pos['dealerkey'] = Prices::getHash($pos, $name);
-				if (!$pos['dealerkey']) return $r;
+				$pos['pricekey'] = Prices::getHash($pos, $name);
+				if (!$pos['pricekey']) return $r;
 				
 				$price[] = $pos;
 				return $r;
