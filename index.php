@@ -9,7 +9,7 @@ use infrajs\load\Load;
 use infrajs\each\Each;
 use infrajs\config\Config;
 use infrajs\catalog\Catalog;
-use akiyatkin\dealers\Dealers;
+use akiyatkin\prices\Prices;
 
 /*
 Проверяет соответствие загруженных прайсов с данными в каталоге. 
@@ -29,18 +29,18 @@ Amatek
 */
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
 $ans = array();
-$dealer = Ans::GET('dealer');
+$dealer = Ans::GET('price');
 if (!$dealer) {
 	$data = array();
-	$list = Dealers::getList();
+	$list = Prices::getList();
 	foreach ($list as $dealer => $info) {	
-		$data[$dealer] = Dealers::init($dealer); 
+		$data[$dealer] = Prices::init($dealer); 
 	}
 	echo Template::parse('-dealers/layout.tpl', array('data' => $data), 'ROOT');
 } else {
-	$rule = Dealers::getRule($dealer);
+	$rule = Prices::getRule($dealer);
 	if (isset($_GET['show'])) {
-		$list = Dealers::getList();
+		$list = Prices::getList();
 		$info = $list[$dealer];	
 		$data = array();
 		Each::exec($info['data']['childs'], function &($group) use (&$data){
@@ -49,14 +49,14 @@ if (!$dealer) {
 			$data[$group['title']] = $group['head'];
 			return $r;
 		});
-		echo Template::parse('-dealers/layout.tpl', array(
+		echo Template::parse('-prices/layout.tpl', array(
 			'data' => $data, 
-			'dealer' => $dealer, 
+			'price' => $dealer, 
 			'rule' => $rule
 		), 'SHOW');
 	} else {
-		if (!$rule) return Ans::err($ans,'Дилер не зарегистрирован в ~dealers.json');
-		$data = Dealers::init($dealer);
+		if (!$rule) return Ans::err($ans,'Дилер не зарегистрирован в ~prices.json');
+		$data = Prices::init($dealer);
 
 		$images = Catalog::getIndex(Catalog::$conf['dir'].$dealer.'/images/');
 		foreach ($data['bingo'] as $obj) {
@@ -69,11 +69,11 @@ if (!$dealer) {
 			if (isset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']])) unset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']]);
 		}
 		ksort($images);
-		echo Template::parse('-dealers/layout.tpl', array(
+		echo Template::parse('-prices/layout.tpl', array(
 			'data' => $data, 
 			'images' => $images,
-			'dealer' => $dealer, 
+			'price' => $dealer, 
 			'rule' => $rule
-		), 'DEALER');
+		), 'PRICE');
 	}
 }
