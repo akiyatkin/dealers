@@ -1,16 +1,15 @@
 <?php
-namespace akiyatkin\dealers;
+namespace akiyatkin\prices;
 use infrajs\excel\Xlsx;
 use infrajs\ans\Ans;
 use infrajs\path\Path;
 use infrajs\once\Once;
 use infrajs\load\Load;
-use akiyatkin\dealers\Dealers;
 use infrajs\catalog\Catalog;
 use infrajs\template\Template;
 
-class Dealers {
-	public static $folder = '~.dealers/';
+class Prices {
+	public static $folder = '~.prices/';
 	/*public static function getKey(&$pos, $name)
 	{
 		//Логика в том что мы умнее производителя и знаем как ему надо называть Артикулы для позиций
@@ -33,14 +32,14 @@ class Dealers {
 		$data = Catalog::init();
 
 		
-		$rule = Dealers::getRule($dealer);
+		$rule = Prices::getRule($dealer);
 		$poss = array();
 		Xlsx::runPoss($data, function &($pos) use (&$poss, $dealer, $rule) {
 			$r = null;
 			if ($pos['Производитель'] != $dealer) return $r;
 			
 			$name = $rule['catalog'];
-			$pos['dealerkey'] = Dealers::getHash($pos, $name);
+			$pos['dealerkey'] = Prices::getHash($pos, $name);
 
 			if (!$pos['dealerkey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
 			
@@ -51,13 +50,13 @@ class Dealers {
 
 		$price = array();
 
-		$list = Dealers::getList();
+		$list = Prices::getList();
 		$info = $list[$dealer];
 		if ($info) {
 			Xlsx::runPoss($info['data'], function &(&$pos) use (&$price, $rule) {
 				$r = null;
 				$name = $rule['price'];
-				$pos['dealerkey'] = Dealers::getHash($pos, $name);
+				$pos['dealerkey'] = Prices::getHash($pos, $name);
 				if (!$pos['dealerkey']) return $r;
 				
 				$price[] = $pos;
@@ -66,8 +65,8 @@ class Dealers {
 		}
 		
 
-		//usort($price, array("akiyatkin\dealers\Dealers","usort"));
-		//usort($poss, array("akiyatkin\dealers\Dealers","usort"));
+		//usort($price, array("akiyatkin\dealers\Prices","usort"));
+		//usort($poss, array("akiyatkin\dealers\Prices","usort"));
 		
 
 		$poss_len = count($poss);
@@ -130,7 +129,7 @@ class Dealers {
 				if ($file[0] == '.') return;
 				if ($file[0] == '~') return;
 
-				$folder = Dealers::$folder;
+				$folder = Prices::$folder;
 
 				$src = Path::theme($folder.$file); //Проверка что файл.
 				if (!$src) return;
@@ -140,12 +139,12 @@ class Dealers {
 				if (!in_array($fd['ext'], array('xlsx'))) return;
 				
 				//Данные из прайса Дилера
-				$fd['data'] = Dealers::getData($folder.$file);
+				$fd['data'] = Prices::getData($folder.$file);
 
 				$name = $fd['name'];
 				$list[$name] = $fd;
 
-			}, scandir(Path::resolve(Dealers::$folder)));
+			}, scandir(Path::resolve(Prices::$folder)));
 			
 			/*$start = 0;
 			$count = 100;
@@ -198,12 +197,12 @@ class Dealers {
 		$fd = Load::srcInfo($src);
 		$name = $fd['name'];
 		$data = Xlsx::parseAll($src);
-		Dealers::applyRules($data, $name);
+		Prices::applyRules($data, $name);
 		return Xlsx::get($data, $name);
 	}
 	public static function applyRules(&$data, $name)
 	{
-		$rule = Dealers::getRule($name);
+		$rule = Prices::getRule($name);
 		
 		foreach ($data as $sheetname => $sheet) {
 			if (in_array($sheetname, $rule['ignore'])) {
