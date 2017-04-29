@@ -6,7 +6,6 @@ use infrajs\path\Path;
 
 
 Event::handler('Catalog.oninit', function (&$data) {
-
 	$list = Prices::getList();
 	$ids = array();
 	foreach ($list as $dealer => $info) {	
@@ -22,8 +21,7 @@ Event::handler('Catalog.oninit', function (&$data) {
 			$r = null;
 			return $r;
 		});		
-	}
-	;
+	};
 	Xlsx::runPoss($data, function &(&$pos) use ($ids) {
 		$r = null;
 		$dealer = $pos['producer'];

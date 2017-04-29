@@ -40,45 +40,55 @@ class Prices {
 			
 			$name = $rule['catalog'];
 			$pos['pricekey'] = Prices::getHash($pos, $name);
-
+			
 			if (!$pos['pricekey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
 			
 			$pos = Catalog::getPos($pos);
-			$poss[] = $pos;
+			$poss[$pos['pricekey']] = array('catalog'=>$pos);
 			return $r;
 		});
 
-		$price = array();
 
 		$list = Prices::getList();
 		$info = $list[$dealer];
+		$miss = array();
+		$bingo = array();
+		$lose = array();
 		if ($info) {
-			Xlsx::runPoss($info['data'], function &(&$pos) use (&$price, $rule) {
+			Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, $poss, &$bingo, &$miss) {
 				$r = null;
 				$name = $rule['price'];
 				$pos['pricekey'] = Prices::getHash($pos, $name);
 				if (!$pos['pricekey']) return $r;
-				
-				$price[] = $pos;
+
+				if (isset($poss[$pos['pricekey']])) {
+					$bingo[] = array(
+						'catalog' => $poss[$pos['pricekey']]['catalog'],
+						'price' => $pos
+					);
+					unset($poss[$pos['pricekey']]);
+				} else {
+					$miss[] = array(
+						'price' => $pos
+					);
+				}
 				return $r;
 			});
 		}
+		$lose = array_values($poss);
 		
-
+		/*
 		//usort($price, array("akiyatkin\dealers\Prices","usort"));
 		//usort($poss, array("akiyatkin\dealers\Prices","usort"));
 		
 
 		$poss_len = count($poss);
 		$price_len = count($price);
-		$miss = array();
-		$bingo = array();
-		$lose = array();
+		
 		$i = 0;
 		$j = 0;
 		while ($i < $poss_len && $j < $price_len) {
-			$r = strcasecmp($poss[$i]['dealerkey'], $price[$j]['dealerkey']);
-
+			$r = strcasecmp($poss[$i]['pricekey'], $price[$j]['pricekey']);
 			if ($r == 0) {
 				$bingo[] = array(
 					'catalog' => $poss[$i],
@@ -109,8 +119,7 @@ class Prices {
 					'price' => $price[$j]
 				);
 				$j++;
-		}
-
+		}*/
 		$ans = Array();
 		$ans['bingo'] = $bingo;
 		$ans['miss'] = $miss;
@@ -175,7 +184,7 @@ class Prices {
 	}
 	public static function getRule($name) 
 	{
-		$rules = Load::loadJSON('~dealers.json');
+		$rules = Load::loadJSON('~prices.json');
 		$rule = isset($rules[$name])? $rules[$name]: array();
 
 		if (!isset($rule['start'])) $rule['start'] = 1;

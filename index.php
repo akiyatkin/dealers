@@ -29,19 +29,19 @@ Amatek
 */
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
 $ans = array();
-$dealer = Ans::GET('price');
-if (!$dealer) {
+$price = Ans::GET('price');
+if (!$price) {
 	$data = array();
 	$list = Prices::getList();
-	foreach ($list as $dealer => $info) {	
-		$data[$dealer] = Prices::init($dealer); 
+	foreach ($list as $price => $info) {	
+		$data[$price] = Prices::init($price); 
 	}
-	echo Template::parse('-dealers/layout.tpl', array('data' => $data), 'ROOT');
+	echo Template::parse('-prices/layout.tpl', array('data' => $data), 'ROOT');
 } else {
-	$rule = Prices::getRule($dealer);
+	$rule = Prices::getRule($price);
 	if (isset($_GET['show'])) {
 		$list = Prices::getList();
-		$info = $list[$dealer];	
+		$info = $list[$price];	
 		$data = array();
 		Each::exec($info['data']['childs'], function &($group) use (&$data){
 
@@ -51,14 +51,14 @@ if (!$dealer) {
 		});
 		echo Template::parse('-prices/layout.tpl', array(
 			'data' => $data, 
-			'price' => $dealer, 
+			'price' => $price, 
 			'rule' => $rule
 		), 'SHOW');
 	} else {
 		if (!$rule) return Ans::err($ans,'Дилер не зарегистрирован в ~prices.json');
-		$data = Prices::init($dealer);
+		$data = Prices::init($price);
 
-		$images = Catalog::getIndex(Catalog::$conf['dir'].$dealer.'/images/');
+		$images = Catalog::getIndex(Catalog::$conf['dir'].$price.'/images/');
 		foreach ($data['bingo'] as $obj) {
 			if (isset($images[$obj['catalog']['article']])) unset($images[$obj['catalog']['article']]);
 			if (isset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']])) unset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']]);
@@ -72,7 +72,7 @@ if (!$dealer) {
 		echo Template::parse('-prices/layout.tpl', array(
 			'data' => $data, 
 			'images' => $images,
-			'price' => $dealer, 
+			'price' => $price, 
 			'rule' => $rule
 		), 'PRICE');
 	}
