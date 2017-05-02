@@ -55,7 +55,7 @@ class Prices {
 		$bingo = array();
 		$lose = array();
 		if ($info) {
-			Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, $poss, &$bingo, &$miss) {
+			Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$miss) {
 				$r = null;
 				$name = $rule['price'];
 				$pos['pricekey'] = Prices::getHash($pos, $name);
