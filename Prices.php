@@ -77,49 +77,6 @@ class Prices {
 		}
 		$lose = array_values($poss);
 		
-		/*
-		//usort($price, array("akiyatkin\dealers\Prices","usort"));
-		//usort($poss, array("akiyatkin\dealers\Prices","usort"));
-		
-
-		$poss_len = count($poss);
-		$price_len = count($price);
-		
-		$i = 0;
-		$j = 0;
-		while ($i < $poss_len && $j < $price_len) {
-			$r = strcasecmp($poss[$i]['pricekey'], $price[$j]['pricekey']);
-			if ($r == 0) {
-				$bingo[] = array(
-					'catalog' => $poss[$i],
-					'price' => $price[$j]
-				);
-				$i++;
-				$j++;
-			} else if ($r < 0) { //Ошибки каталога
-				$lose[] = array(
-					'catalog' => $poss[$i]
-				);
-				$i++;
-			} else if ($r > 0) { //Ошибки прайса
-				$miss[] = array(
-					'price' => $price[$j]
-				);
-				$j++;
-			}
-		}
-		while ($i < $poss_len) {
-				$lose[] = array(
-					'catalog' => $poss[$i]
-				);
-				$i++;
-		}
-		while ($j < $price_len) {
-				$miss[] = array(
-					'price' => $price[$j]
-				);
-				$j++;
-		}*/
 		$ans = Array();
 		$ans['bingo'] = $bingo;
 		$ans['miss'] = $miss;
@@ -159,30 +116,6 @@ class Prices {
 				$list[$name] = $fd;
 
 			}, scandir(Path::resolve(Prices::$folder)));
-			
-			/*$start = 0;
-			$count = 100;
-			$args = array($start, $count);
-			$prods = Catalog::cache('producers.php', function ($start, $count) {
-				$ans=array();
-
-				$data=Catalog::init();
-				$prods=array();
-				Xlsx::runPoss($data, function &(&$pos) use (&$prods) {
-					if (empty($prods[$pos['producer']])) $prods[$pos['producer']] = 0;
-					$prods[$pos['producer']]++;
-					$r = null; return $r;
-				});
-				arsort($prods, SORT_NUMERIC);
-				$prods=array_slice($prods, $start, $count);
-				return $prods;
-			},$args,isset($_GET['re']));
-
-			foreach($prods as $name => $count) {
-				if (isset($list[$name])) continue;
-				$list[$name] = Load::nameInfo($name);
-				$list[$name]['data'] = array();
-			}*/
 			return $list;
 		});
 		
@@ -249,17 +182,20 @@ class Prices {
 				continue;
 			}
 			foreach ($sheet as $i => $row) {
-				if ($i >= $rule['start']) break;
+				if ($i > $rule['start']-1) break;
 				unset($data[$sheetname][$i]);
 			}
 		}
 
 		if ($rule['head']) {
-			foreach($rule['head'] as $k => $val) {
-				$head[$k+2] = $val;
-			}
 			foreach ($data as $name => $list) {
-				$data[$name][$rule['start']] = $head;
+				$head = array_shift($list);
+				if (!$head) continue;
+				
+				foreach ($head as $i => $val) {
+					$head[$i] = array_shift($rule['head']);
+				}
+				array_unshift($data[$name], $head);
 			}
 		}
 	}
