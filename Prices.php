@@ -140,17 +140,22 @@ class Prices {
 
 				$folder = Prices::$folder;
 
-				$src = Path::theme($folder.$file); //Проверка что файл.
-				if (!$src) return;
 				$file = Path::toutf($file);
 				$fd = Load::nameInfo($file);
-
-				if (!in_array($fd['ext'], array('xlsx'))) return;
-				
-				//Данные из прайса Дилера
-				$fd['data'] = Prices::getData($folder.$file);
-
 				$name = $fd['name'];
+				
+				
+				if (Path::theme($folder.$file)){
+					if (!in_array($fd['ext'], array('xlsx'))) return;
+					$fd['data'] = Prices::getData($folder.$file, $name);
+				} else {
+					$fd['data'] = Prices::getDirData($folder.$file.'/', $name);
+				}
+				//Данные из прайса Дилера
+				
+				
+
+				
 				$list[$name] = $fd;
 
 			}, scandir(Path::resolve(Prices::$folder)));
@@ -188,6 +193,7 @@ class Prices {
 		$rule = isset($rules[$name])? $rules[$name]: array();
 
 		if (!isset($rule['start'])) $rule['start'] = 1;
+		if (!isset($rule['head'])) $rule['head'] = false;
 		if (!isset($rule['ignore'])) $rule['ignore'] = [];
 		if (!isset($rule['price'])) $rule['price'] = '{Артикул}';
 		if (!isset($rule['catalog'])) $rule['catalog'] = '{Артикул}';
@@ -201,13 +207,37 @@ class Prices {
 		if ($val == 0) return 0;
 		return $val > 0 ? 1 : -1;
 	}*/
-	public static function getData($src)
-	{
-		$fd = Load::srcInfo($src);
-		$name = $fd['name'];
+	public static function getData($src, $name)
+	{	
 		$data = Xlsx::parseAll($src);
 		Prices::applyRules($data, $name);
 		return Xlsx::get($data, $name);
+	}
+	public static function getDirData($src, $name)
+	{
+		$data = array();
+		array_map(function ($file) use ($src, &$data, $name) {
+
+			if ($file[0] == '.') return;
+			if ($file[0] == '~') return;
+
+			$file = Path::toutf($file);
+			
+			if (!Path::theme($src.$file)) return;
+			$fd = Load::nameInfo($file);
+			if (!in_array($fd['ext'], array('xlsx'))) return;
+
+			
+			$newdata = Prices::getData($src.$file, $name);
+			
+			if (!$data) {
+				$data = $newdata;
+			} else {
+				$data['childs'] = array_merge($data['childs'], $newdata['childs']);
+			}
+		}, scandir(Path::theme($src)));
+		$data['title'] = $name;
+		return $data;
 	}
 	public static function applyRules(&$data, $name)
 	{
@@ -221,6 +251,15 @@ class Prices {
 			foreach ($sheet as $i => $row) {
 				if ($i >= $rule['start']) break;
 				unset($data[$sheetname][$i]);
+			}
+		}
+
+		if ($rule['head']) {
+			foreach($rule['head'] as $k => $val) {
+				$head[$k+2] = $val;
+			}
+			foreach ($data as $name => $list) {
+				$data[$name][$rule['start']] = $head;
 			}
 		}
 	}
