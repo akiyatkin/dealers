@@ -109,7 +109,6 @@
 {comma:}, 
 {info:}
 	<small style="color:gray; float:right">
-		Роз: <b>{~cost(catalog.Цена розничная)} руб.</b>, 
-		Опт: <b>{~cost(catalog.Цена оптовая)}</b>, 
+		Цена: <b>{~cost(catalog.Цена)} руб.</b>, 
 		Код: <b>{catalog.Код}</b>
 	</small>
