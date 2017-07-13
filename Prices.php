@@ -50,6 +50,7 @@ class Prices {
 
 
 		$list = Prices::getList();
+		if(!isset($list[$dealer])) $list[$dealer] = array();
 		$info = $list[$dealer];
 		$miss = array();
 		$bingo = array();

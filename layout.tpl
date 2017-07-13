@@ -67,7 +67,12 @@
 			{lose::list-lose}
 		</table>
 		{list-lose:}
-			<tr><td><a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a><br>{catalog.images::image}</td>
+			<tr>
+			<td>
+				<a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a>
+				{:info}
+				<br>{catalog.images::image}
+			</td>
 			<td class="danger">{catalog.pricekey}</td></tr>
 	{showbingo:}
 		<h2>Совпадения</h2>
@@ -77,8 +82,12 @@
 			{bingo::list-bingo}
 		</table>
 		{list-bingo:}
-			<tr><td><a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a>
-			<br>{catalog.images::image}</td>
+			<tr>
+				<td>
+					<a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a>
+					{:info}
+					<br>{catalog.images::image}
+				</td>
 			<td class="success">{price.pricekey}</td></tr>
 {SHOW:}
 	{:doc}
@@ -98,3 +107,9 @@
 		{exhead:}{.}{~last()|:comma}
 
 {comma:}, 
+{info:}
+	<small style="color:gray; float:right">
+		Роз: <b>{~cost(catalog.Цена розничная)} руб.</b>, 
+		Опт: <b>{~cost(catalog.Цена оптовая)}</b>, 
+		Код: <b>{catalog.Код}</b>
+	</small>

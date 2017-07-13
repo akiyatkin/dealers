@@ -41,6 +41,7 @@ if (!$price) {
 	$rule = Prices::getRule($price);
 	if (isset($_GET['show'])) {
 		$list = Prices::getList();
+		if(!isset($list[$price])) $list[$price] = array();
 		$info = $list[$price];	
 		$data = array();
 		Each::exec($info['data']['childs'], function &($group) use (&$data){
@@ -60,13 +61,24 @@ if (!$price) {
 
 		$images = Catalog::getIndex(Catalog::$conf['dir'].$price.'/images/');
 		foreach ($data['bingo'] as $obj) {
-			if (isset($images[$obj['catalog']['article']])) unset($images[$obj['catalog']['article']]);
-			if (isset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']])) unset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']]);
+			
+			if ( isset($images[strtolower($obj['catalog']['article'])]) ) unset($images[strtolower($obj['catalog']['article'])]);
+
+			if ( isset($images[strtolower($obj['catalog']['producer'].'-'.$obj['catalog']['article'])])) unset($images[strtolower($obj['catalog']['producer'].'-'.$obj['catalog']['article'])]);
 		}
 		
 		foreach ($data['lose'] as $obj) { //Только в каталоге
-			if (isset($images[$obj['catalog']['article']])) unset($images[$obj['catalog']['article']]);
-			if (isset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']])) unset($images[$obj['catalog']['producer'].'-'.$obj['catalog']['article']]);
+			
+			if ( isset(  $images[strtolower($obj['catalog']['article'])] ) )  {
+				unset( $images[ strtolower($obj['catalog']['article'])]);
+			}
+			
+			
+			$key = $obj['catalog']['producer'].'-'.$obj['catalog']['article'];
+			$key = strtolower($key);
+			if (isset($images[$key])) {
+				unset($images[$key]);
+			}
 		}
 		ksort($images);
 		echo Template::parse('-prices/layout.tpl', array(
