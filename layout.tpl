@@ -78,7 +78,7 @@
 		<h2>Совпадения</h2>
 		<i>Найдны позиции и в прайсе, и в каталоге - <b>{~length(bingo)}</b></i>
 		<table class="table table-striped">
-			<tr><th>Каталог</th><th>Поиск в прайсе</th></tr>
+			<tr><th>Каталог</th><th>Поиск в прайсе</th><th>Поиск в каталоге</th></tr>
 			{bingo::list-bingo}
 		</table>
 		{list-bingo:}
@@ -88,7 +88,7 @@
 					{:info}
 					<br>{catalog.images::image}
 				</td>
-			<td class="success">{price.pricekey}</td></tr>
+			<td class="success">{price.pricekey}</td><td class="success">{catalog.pricekey}</td></tr>
 {SHOW:}
 	{:doc}
 	<ul class="breadcrumb">

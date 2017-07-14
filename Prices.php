@@ -21,9 +21,10 @@ class Prices {
 		return Path::encode($pos[$name]);
 		//return str_replace(["\n","\r"," ", "\t",'.',',','%','(',')','-','‐'], '', $pos[$name]); 
 	}*/
-	public static function getHash(&$pos, $name)
+	public static function getHash(&$pos, $name, $dealer)
 	{
-		$hash = Template::parse(array($name),$pos);
+		$hash = Template::parse(array($name), $pos);
+		$hash = preg_replace('/^'.$dealer.'\-/i', '', $hash);
 		return $hash;
 	}
 	public static function init($dealer) 
@@ -31,15 +32,16 @@ class Prices {
 		
 		$data = Catalog::init();
 
-		
+
 		$rule = Prices::getRule($dealer);
 		$poss = array();
 		Xlsx::runPoss($data, function &($pos) use (&$poss, $dealer, $rule) {
 			$r = null;
-			if ($pos['Производитель'] != $dealer) return $r;
+			if ($pos['producer'] != $dealer) return $r;
+
 			
 			$name = $rule['catalog'];
-			$pos['pricekey'] = Prices::getHash($pos, $name);
+			$pos['pricekey'] = Prices::getHash($pos, $name, $dealer);
 			
 			if (!$pos['pricekey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
 			
@@ -56,10 +58,10 @@ class Prices {
 		$bingo = array();
 		$lose = array();
 		if ($info) {
-			Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$miss) {
+			Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$miss, $dealer) {
 				$r = null;
 				$name = $rule['price'];
-				$pos['pricekey'] = Prices::getHash($pos, $name);
+				$pos['pricekey'] = Prices::getHash($pos, $name, $dealer);
 				if (!$pos['pricekey']) return $r;
 
 				if (isset($poss[$pos['pricekey']])) {
