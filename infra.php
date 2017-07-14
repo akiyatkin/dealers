@@ -32,7 +32,7 @@ Event::handler('Catalog.oninit', function (&$data) {
 		$dealer = $pos['producer'];
 		$rule = Prices::getRule($dealer);
 		$key = Prices::getHash($pos, $rule['catalog'], $dealer);
-		$id = $dealer.'-'.$key;
+		$id = $key;
 
 		if (empty($ids[$dealer][$id])) return $r;
 		$data = array(
