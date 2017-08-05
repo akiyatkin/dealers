@@ -20,15 +20,14 @@
 		<div>Поиск в прайсе по ключу: <b>{rule.price}</b></div>
 		<div>Поиск в каталоге по ключу: <b>{rule.catalog}</b></div>
 		<ul>
-			<li><a href="/-catalog/check/repeats/{price}">Дубли артикула в каталоге</a></li>
-			<li><a href="/{root}/{price}/doubles">Дубли ключа поиска в прайсе и каталоге</a></li>
 			<li><a href="/{root}/{price}/show">Шапка прайса</a></li>
 		</ul>
 	{priceblock:}
 		<i>
 			Ошибки - прайс: <b>{~length(losecat)}</b>, каталог: <b>{~length(losepr)}</b>. 
 			Совпадения: <b>{~length(bingo)}</b>. 
-			Дубли - прайс: <b>{doublesprcount}</b>, каталог: <b>{doublescatcount}</b>, артикул: <b>{repeats}</b>.
+			<a href="/{root}/{price}/doubles">Дубли</a> - прайс: <b>{doublesprcount}</b>, каталог: <b>{doublescatcount}</b>, <a href="/-catalog/check/repeats/{price}">артикул</a>: <b>{repeats}</b>.
+			<a href="/catalog?m=:producer::.{price}=1">Всего</a>: <b>{count}</b>.
 		</i>
 {PRICE:}
 	<h1>Прайс {price}</h1>

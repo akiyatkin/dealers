@@ -7,7 +7,7 @@ use infrajs\access\Access;
 use infrajs\template\Template;
 use infrajs\load\Load;
 use infrajs\each\Each;
-use infrajs\catalog\check\Check;
+
 use infrajs\rest\Rest;
 use infrajs\config\Config;
 use infrajs\catalog\Catalog;
@@ -34,21 +34,12 @@ Access::debug(true); //Запрещает доступ если нет отла�
 return Rest::get( function () {
 		$prices = array();
 		$list = Prices::getList();
-		$res = Check::repeats();
 		foreach ($list as $price => $info) {
 			$prices[$price] = array();
 			$prices[$price]['data'] = Prices::init($price); 
-			$repeats = 0;
-			if (!empty($res['list'][$price])) {
-				$repeats = sizeof($res['list'][$price]);
-			}
-			$prices[$price]['price'] = $price;
-			$prices[$price]['data']['repeats'] = $repeats;
 		}
 
 		
-		
-
 		echo Rest::parse('-prices/layout.tpl', array(
 			'prices' => $prices
 		), 'ROOT');
@@ -73,13 +64,6 @@ return Rest::get( function () {
 			}
 		}
 
-		$res = Check::repeats();
-		$repeats = 0;
-		if (!empty($res['list'][$price])) {
-			$repeats = sizeof($res['list'][$price]);
-		}
-		$data['repeats'] = $repeats;
-
 		ksort($images);
 		echo Rest::parse('-prices/layout.tpl', array(
 			'data' => $data, 
@@ -93,12 +77,13 @@ return Rest::get( function () {
 		if(!isset($list[$price])) $list[$price] = array();
 		$info = $list[$price];	
 		$data = array();
-		Each::exec($info['data']['childs'], function &($group) use (&$data){
 
+		Each::exec($info['data']['childs'], function &($group) use (&$data){
 			$r = null;
 			$data[$group['title']] = $group['head'];
 			return $r;
 		});
+
 		echo Rest::parse('-prices/layout.tpl', array(
 			'data' => $data, 
 			'price' => $price, 

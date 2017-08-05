@@ -5,6 +5,7 @@ use infrajs\ans\Ans;
 use infrajs\path\Path;
 use infrajs\once\Once;
 use infrajs\load\Load;
+use infrajs\catalog\check\Check;
 use infrajs\catalog\Catalog;
 use infrajs\template\Template;
 
@@ -111,8 +112,29 @@ class Prices {
 			$ans['doublespr'] = $doublespr;
 			
 			$ans['losepr'] = $losepr;
+			$ans['price'] = $price;
+
+			$ans['count'] = Prices::getCount($price);	
+			$res = Check::repeats();
+			$repeats = 0;
+			if (!empty($res['list'][$price])) {
+				$repeats = sizeof($res['list'][$price]);
+			}
+			$ans['repeats'] = $repeats;
 			return $ans;
 		}, array($price), isset($_GET['re']));
+	}
+	public static function getCount($price) {
+		return Catalog::cache(__FILE__.'getCount', function ($price) {
+			//Создали метку, установили ключ и получили данные
+			$mark = Catalog::getDefaultMark();
+			$mark->setVal(':producer::.'.$price.'=1');
+			$md = $mark->getData();
+			$list = Catalog::search($md);
+			$count = $list['count'];
+			return $count;
+		}, array($price));
+		
 	}
 	/**
 	 * Массив дилеров в формает fd (nameInfo) с необработанными данными из Excel (data)
