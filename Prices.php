@@ -21,77 +21,105 @@ class Prices {
 		return Path::encode($pos[$name]);
 		//return str_replace(["\n","\r"," ", "\t",'.',',','%','(',')','-','‐'], '', $pos[$name]); 
 	}*/
-	public static function getHash(&$pos, $name, $dealer)
+	public static function getHash(&$pos, $name, $price)
 	{
 		$hash = Template::parse(array($name), $pos);
-		$hash = preg_replace('/^'.$dealer.'\-/i', '', $hash);
+		$hash = preg_replace('/^'.$price.'\-/i', '', $hash);
 		return $hash;
 	}
-	public static function init($dealer) 
+	public static function init($price) 
 	{
-		
-		$data = Catalog::init();
+		return Catalog::cache(__FILE__, function ($price) {
+			$data = Catalog::init();
 
-
-		$rule = Prices::getRule($dealer);
-		$poss = array();
-		Xlsx::runPoss($data, function &($pos) use (&$poss, $dealer, $rule) {
-			$r = null;
-			if ($pos['producer'] != $dealer) return $r;
-
-			
-			$name = $rule['catalog'];
-			$pos['pricekey'] = Prices::getHash($pos, $name, $dealer);
-			
-			if (!$pos['pricekey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
-			
-			$pos = Catalog::getPos($pos);
-			$poss[$pos['pricekey']] = array('catalog'=>$pos);
-			return $r;
-		});
-
-
-		$list = Prices::getList();
-		if(!isset($list[$dealer])) $list[$dealer] = array();
-		$info = $list[$dealer];
-		$miss = array();
-		$bingo = array();
-		$lose = array();
-		if ($info) {
-			Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$miss, $dealer) {
+			$rule = Prices::getRule($price);
+			$poss = array();
+			$doublescat = array();
+			$doublescatcount = 0;
+			Xlsx::runPoss($data, function &($pos) use (&$poss, $price, $rule, &$doublescat, &$doublescatcount) {
 				$r = null;
-				$name = $rule['price'];
-				$pos['pricekey'] = Prices::getHash($pos, $name, $dealer);
-				if (!$pos['pricekey']) return $r;
+				if ($pos['producer'] != $price) return $r;
 
+				
+				$name = $rule['catalog'];
+				$pos['pricekey'] = Prices::getHash($pos, $name, $price);
+				
+				if (!$pos['pricekey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
+				
+				$pos = Catalog::getPos($pos);
 				if (isset($poss[$pos['pricekey']])) {
-					$bingo[] = array(
-						'catalog' => $poss[$pos['pricekey']]['catalog'],
-						'price' => $pos
-					);
-					unset($poss[$pos['pricekey']]);
-				} else {
-					$miss[] = array(
-						'price' => $pos
-					);
+					if(!isset($doublescat[$pos['pricekey']])) {
+						$doublescat[$pos['pricekey']] = array();
+						$doublescat[$pos['pricekey']][] = $poss[$pos['pricekey']];
+						$doublescatcount++;
+					}
+					$doublescatcount++;
+					$doublescat[$pos['pricekey']][] = $pos;
+
 				}
+				$poss[$pos['pricekey']] = array('catalog'=>$pos);
 				return $r;
 			});
-		}
-		$lose = array_values($poss);
-		
-		$ans = Array();
-		$ans['bingo'] = $bingo;
-		$ans['miss'] = $miss;
-		$ans['lose'] = $lose;
-		return $ans;
+
+
+			$list = Prices::getList();
+			if (!isset($list[$price])) $list[$price] = array();
+			$info = $list[$price];
+			$losecat = array();
+			$bingo = array();
+			$losepr = array();
+			$doublespr = array();
+			$doublesprcount = 0;
+			if ($info) {
+
+				Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$losecat, $price, &$doublespr) {
+					$r = null;
+					$name = $rule['price'];
+					$pos['pricekey'] = Prices::getHash($pos, $name, $price);
+					if (!$pos['pricekey']) return $r;
+					if(empty($doublespr[$pos['pricekey']])) $doublespr[$pos['pricekey']] = array();
+					$doublespr[$pos['pricekey']][] = $pos;
+
+					if (isset($poss[$pos['pricekey']])) {
+						$pos['finded'] = true;
+						$bingo[] = array(
+							'catalog' => $poss[$pos['pricekey']]['catalog'],
+							'price' => $pos
+						);
+						unset($poss[$pos['pricekey']]);
+					} else {
+						$losecat[] = array(
+							'price' => $pos
+						);
+					}
+					return $r;
+				});
+				foreach($doublespr as $k => $v) {
+					if(sizeof($v) < 2) unset($doublespr[$k]);
+					else $doublesprcount += sizeof($v);
+				}
+			}
+			$losepr = array_values($poss);
+			
+			$ans = Array();
+			$ans['bingo'] = $bingo;
+			$ans['losecat'] = $losecat;
+
+			$ans['doublescat'] = $doublescat;
+			$ans['doublescatcount'] = $doublescatcount;
+			$ans['doublesprcount'] = $doublesprcount;
+			$ans['doublespr'] = $doublespr;
+			
+			$ans['losepr'] = $losepr;
+			return $ans;
+		}, array($price), isset($_GET['re']));
 	}
 	/**
 	 * Массив дилеров в формает fd (nameInfo) с необработанными данными из Excel (data)
 	 **/
 	public static function getList()
 	{
-		return Once::exec(__FILE__.'getList', function(){
+		return Once::exec(__FILE__.'getList', function () {
 			$list = array();
 			array_map(function ($file) use (&$list) {
 			
@@ -113,8 +141,6 @@ class Prices {
 				}
 				//Данные из прайса Дилера
 				
-				
-
 				
 				$list[$name] = $fd;
 

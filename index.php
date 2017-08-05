@@ -7,6 +7,8 @@ use infrajs\access\Access;
 use infrajs\template\Template;
 use infrajs\load\Load;
 use infrajs\each\Each;
+use infrajs\catalog\check\Check;
+use infrajs\rest\Rest;
 use infrajs\config\Config;
 use infrajs\catalog\Catalog;
 use akiyatkin\prices\Prices;
@@ -28,47 +30,37 @@ Amatek
 
 */
 Access::debug(true); //Запрещает доступ если нет отладочного режима.
-$ans = array();
-$price = Ans::GET('price');
-if (!$price) {
-	$data = array();
-	$list = Prices::getList();
-	foreach ($list as $price => $info) {	
-		$data[$price] = Prices::init($price); 
-	}
-	echo Template::parse('-prices/layout.tpl', array('data' => $data), 'ROOT');
-} else {
-	$rule = Prices::getRule($price);
-	if (isset($_GET['show'])) {
+
+return Rest::get( function () {
+		$prices = array();
 		$list = Prices::getList();
-		if(!isset($list[$price])) $list[$price] = array();
-		$info = $list[$price];	
-		$data = array();
-		Each::exec($info['data']['childs'], function &($group) use (&$data){
+		$res = Check::repeats();
+		foreach ($list as $price => $info) {
+			$prices[$price] = array();
+			$prices[$price]['data'] = Prices::init($price); 
+			$repeats = 0;
+			if (!empty($res['list'][$price])) {
+				$repeats = sizeof($res['list'][$price]);
+			}
+			$prices[$price]['price'] = $price;
+			$prices[$price]['data']['repeats'] = $repeats;
+		}
 
-			$r = null;
-			$data[$group['title']] = $group['head'];
-			return $r;
-		});
-		echo Template::parse('-prices/layout.tpl', array(
-			'data' => $data, 
-			'price' => $price, 
-			'rule' => $rule
-		), 'SHOW');
-	} else {
-		if (!$rule) return Ans::err($ans,'Дилер не зарегистрирован в ~prices.json');
+		
+		
+
+		echo Rest::parse('-prices/layout.tpl', array(
+			'prices' => $prices
+		), 'ROOT');
+	}, [ function ($price) {
+		$rule = Prices::getRule($price);
 		$data = Prices::init($price);
-
 		$images = Catalog::getIndex(Catalog::$conf['dir'].$price.'/images/');
 		foreach ($data['bingo'] as $obj) {
-			
 			if ( isset($images[strtolower($obj['catalog']['article'])]) ) unset($images[strtolower($obj['catalog']['article'])]);
-
 			if ( isset($images[strtolower($obj['catalog']['producer'].'-'.$obj['catalog']['article'])])) unset($images[strtolower($obj['catalog']['producer'].'-'.$obj['catalog']['article'])]);
-		}
-		
-		foreach ($data['lose'] as $obj) { //Только в каталоге
-			
+		}		
+		foreach ($data['losepr'] as $obj) { //Только в каталоге
 			if ( isset(  $images[strtolower($obj['catalog']['article'])] ) )  {
 				unset( $images[ strtolower($obj['catalog']['article'])]);
 			}
@@ -80,12 +72,49 @@ if (!$price) {
 				unset($images[$key]);
 			}
 		}
+
+		$res = Check::repeats();
+		$repeats = 0;
+		if (!empty($res['list'][$price])) {
+			$repeats = sizeof($res['list'][$price]);
+		}
+		$data['repeats'] = $repeats;
+
 		ksort($images);
-		echo Template::parse('-prices/layout.tpl', array(
+		echo Rest::parse('-prices/layout.tpl', array(
 			'data' => $data, 
 			'images' => $images,
 			'price' => $price, 
 			'rule' => $rule
-		), 'PRICE');
+		),'PRICE');
+	}, 'show', function ($price) {
+		$rule = Prices::getRule($price);
+		$list = Prices::getList();
+		if(!isset($list[$price])) $list[$price] = array();
+		$info = $list[$price];	
+		$data = array();
+		Each::exec($info['data']['childs'], function &($group) use (&$data){
+
+			$r = null;
+			$data[$group['title']] = $group['head'];
+			return $r;
+		});
+		echo Rest::parse('-prices/layout.tpl', array(
+			'data' => $data, 
+			'price' => $price, 
+			'rule' => $rule
+		), 'SHOW');
+	}, 'doubles', function ($price) {
+		$rule = Prices::getRule($price);
+		$data = Prices::init($price);
+
+		echo Rest::parse('-prices/layout.tpl', array(
+			'data' => $data, 
+			'price' => $price, 
+			'rule' => $rule
+		),'DOUBLES');
+	}, function () {
+		http_response_code(404);
+		echo '404 что вы имеете ввиду?';
 	}
-}
+]);

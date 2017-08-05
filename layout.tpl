@@ -1,43 +1,41 @@
-{doc:}
-<!DOCTYPE html>	
-<html>
-	<head>
-		<link rel="stylesheet" href="/-collect/?css" />
-	</head>
-	<body>
-		<div style="margin-top:50px" class="container">{/doc:}</div>
-	</body>
-</html>
 {ROOT:}
-	{:doc}
-	<ul class="breadcrumb">
-		<li><a href="/">Главная</a></li>
-		<li class="active">Список прайсов</li>
-	</ul>
 	<h1>Сравнение прайсов и данных каталога</h1>
 	Список прайсов
 	<ul>
-		{data::head}
+		{prices::head}
 	</ul>
-	{:/doc}
-{head:}
-	<li><a href="/-prices/?price={~key}">{~key}</a><br>
-		<i>Ошибки - прайс: <b>{~length(miss)}</b>, каталог: <b>{~length(lose)}</b>. Совпадения: <b>{~length(bingo)}</b></i>
-	</li>
+	{head:}
+		<li><a href="/{root}/{~key}">{~key}</a><br>
+			{data:priceblock}
+		</li>
+{DOUBLES:}
+	<h1>Дубли прайса {price}</h1>
+	{data:priceinfo}
+	<h2>Дубли прайса</h2>
+	{~print(data.doublespr)}
+	<h2>Дубли каталога</h2>
+	{~print(data.doublescat)}
+	{priceinfo:}
+		{:priceblock}
+		<div>Поиск в прайсе по ключу: <b>{rule.price}</b></div>
+		<div>Поиск в каталоге по ключу: <b>{rule.catalog}</b></div>
+		<ul>
+			<li><a href="/-catalog/check/repeats/{price}">Дубли артикула в каталоге</a></li>
+			<li><a href="/{root}/{price}/doubles">Дубли ключа поиска в прайсе и каталоге</a></li>
+			<li><a href="/{root}/{price}/show">Шапка прайса</a></li>
+		</ul>
+	{priceblock:}
+		<i>
+			Ошибки - прайс: <b>{~length(losecat)}</b>, каталог: <b>{~length(losepr)}</b>. 
+			Совпадения: <b>{~length(bingo)}</b>. 
+			Дубли - прайс: <b>{doublesprcount}</b>, каталог: <b>{doublescatcount}</b>, артикул: <b>{repeats}</b>.
+		</i>
 {PRICE:}
-	{:doc}
-	<ul class="breadcrumb">
-		<li><a href="/-prices/">Список прайсов</a></li>
-		<li class="active">Анализ {price}</li>
-		<li><a href="/-prices/?price={price}&show">Проверка шапки</a></li>
-	</ul>
 	<h1>Прайс {price}</h1>
 	{data:body}
-	{:/doc}
+	
 	{body:}
-		<i>Ошибки - прайс: <b>{~length(miss)}</b>, каталог: <b>{~length(lose)}</b>. Совпадения: <b>{~length(bingo)}</b></i>
-		<div>Поиск в прайсе: <b>{rule.price}</b></div>
-		<div>Поиск в каталоге: <b>{rule.catalog}</b></div>
+		{:priceinfo}
 		{:showpriceerror}
 		{:showcaterror}
 
@@ -53,20 +51,20 @@
 			<img title="{.}" src="/-imager/?src={.}&h=50">
 	{showpriceerror:}
 		<h2>Ошибки прайса</h2>
-		<i>Позиции в прайсе без совпадений с каталогом - <b>{~length(miss)}</b></i>
+		<i>Позиции в прайсе без совпадений с каталогом - <b>{~length(losecat)}</b></i>
 		<ul>
-			{miss::list-miss}
+			{losecat::list-losecat}
 		</ul>
-		{list-miss:}
+		{list-losecat:}
 			<li>{price.pricekey}</li>
 	{showcaterror:}
 		<h2>Ошибки каталога</h2>
-		<i>Найдены позиции только в каталоге - <b>{~length(lose)}</b></i>
+		<i>Найдены позиции только в каталоге - <b>{~length(losepr)}</b></i>
 		<table class="table table-striped">
 			<tr><th>Каталог</th><th>Поиск в прайсе</th></tr>
-			{lose::list-lose}
+			{losepr::list-losepr}
 		</table>
-		{list-lose:}
+		{list-losepr:}
 			<tr>
 			<td>
 				<a href="/catalog/{catalog.producer}/{catalog.article}">{catalog.Артикул}</a>
@@ -89,26 +87,19 @@
 					<br>{catalog.images::image}
 				</td>
 			<td class="success">{price.pricekey}</td></tr>
+	{info:}
+		<small style="color:gray; float:right">
+			Цена: <b>{~cost(catalog.Цена)} руб.</b>, 
+			Код: <b>{catalog.Код}</b>
+		</small>
 {SHOW:}
-	{:doc}
-	<ul class="breadcrumb">
-		<li><a href="/-prices/">Список прайсов</a></li>
-		<li><a href="/-prices/?price={price}">Анализ {price}</a></li>
-		<li class="active">Проверка шапки</li>
-	</ul>
 	<h1>Шапка прайса {price}</h1>
 	<div>Поиск в прайсе: <b>{rule.price}</b></div>
 	<div>Поиск в каталоге: <b>{rule.catalog}</b></div>
 	{data::exlist}
-	{:/doc}
 	{exlist:}
 		<h2>{~key}</h2>
 		{::exhead}.
 		{exhead:}{.}{~last()|:comma}
 
 {comma:}, 
-{info:}
-	<small style="color:gray; float:right">
-		Цена: <b>{~cost(catalog.Цена)} руб.</b>, 
-		Код: <b>{catalog.Код}</b>
-	</small>
