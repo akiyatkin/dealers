@@ -34,14 +34,15 @@ Access::debug(true); //Запрещает доступ если нет отла�
 return Rest::get( function () {
 		$prices = array();
 		$list = Prices::getList();
+		$time = 0;
 		foreach ($list as $price => $info) {
 			$prices[$price] = array();
 			$prices[$price]['data'] = Prices::init($price); 
+			$time = $prices[$price]['data']['time'];
 		}
-
-		
 		echo Rest::parse('-prices/layout.tpl', array(
-			'prices' => $prices
+			'prices' => $prices,
+			'time' => $time
 		), 'ROOT');
 	}, [ function ($price) {
 		$rule = Prices::getRule($price);

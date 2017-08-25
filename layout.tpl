@@ -1,4 +1,5 @@
 {ROOT:}
+	<div class="pull-right">Последние изменения: <b>{~date(:y.d.Y H:i,time)}</b></div>
 	<h1>Сравнение прайсов и данных каталога</h1>
 	Список прайсов
 	<ul>
@@ -9,6 +10,7 @@
 			{data:priceblock}
 		</li>
 {DOUBLES:}
+	<div class="pull-right">Последние изменения: <b>{~date(:y.d.Y H:i,data.time)}</b></div>
 	<h1>Дубли прайса {price}</h1>
 	{data:priceinfo}
 	<h2>Дубли прайса</h2>
@@ -30,6 +32,7 @@
 			<a href="/catalog?m=:producer::.{price}=1">Всего</a>: <b>{count}</b>.
 		</i>
 {PRICE:}
+	<div class="pull-right">Последние изменения: <b>{~date(:y.d.Y H:i,data.time)}</b></div>
 	<h1>Прайс {price}</h1>
 	{data:body}
 	
@@ -92,6 +95,7 @@
 			Код: <b>{catalog.Код}</b>
 		</small>
 {SHOW:}
+	<div class="pull-right">Последние изменения: <b>{~date(:y.d.Y H:i,data.time)}</b></div>
 	<h1>Шапка прайса {price}</h1>
 	<div>Поиск в прайсе: <b>{rule.price}</b></div>
 	<div>Поиск в каталоге: <b>{rule.catalog}</b></div>

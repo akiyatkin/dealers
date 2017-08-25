@@ -121,6 +121,7 @@ class Prices {
 				$repeats = sizeof($res['list'][$price]);
 			}
 			$ans['repeats'] = $repeats;
+			$ans['time'] = time();
 			return $ans;
 		}, array($price), isset($_GET['re']));
 	}
