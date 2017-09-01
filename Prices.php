@@ -7,6 +7,7 @@ use infrajs\once\Once;
 use infrajs\load\Load;
 use infrajs\catalog\check\Check;
 use infrajs\catalog\Catalog;
+use infrajs\each\Each;
 use infrajs\template\Template;
 
 class Prices {
@@ -76,6 +77,21 @@ class Prices {
 				Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$losecat, $price, &$doublespr) {
 					$r = null;
 					$name = $rule['price'];
+
+					if (isset($rule['synonyms'])) {
+						foreach ($rule['synonyms'] as $val => $vals) {
+							if (!empty($pos[$val])) continue;
+							Each::exec($vals, function &($syn) use (&$pos, $val) {
+								$r = null;
+								if (empty($pos[$syn])) return $r;
+								$pos[$val] = $pos[$syn];	
+								$r = false;
+								return $r;
+							});
+						}	
+					}
+					
+
 					$pos['pricekey'] = Prices::getHash($pos, $name, $price);
 					if (!$pos['pricekey']) return $r;
 					if(empty($doublespr[$pos['pricekey']])) $doublespr[$pos['pricekey']] = array();
