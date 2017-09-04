@@ -29,11 +29,25 @@ class Prices {
 		$hash = preg_replace('/^'.$price.'\-/i', '', $hash);
 		return $hash;
 	}
+	public static function checkSynonyms(&$pos, $rule) 
+	{
+		if (isset($rule['synonyms'])) {
+			foreach ($rule['synonyms'] as $val => $vals) {
+				if (!empty($pos[$val])) continue;
+				Each::exec($vals, function &($syn) use (&$pos, $val) {
+					$r = null;
+					if (empty($pos[$syn])) return $r;
+					$pos[$val] = $pos[$syn];
+					$r = false;
+					return $r;
+				});
+			}
+		}
+	}
 	public static function init($price) 
 	{
 		return Catalog::cache(__FILE__, function ($price) {
 			$data = Catalog::init();
-
 			$rule = Prices::getRule($price);
 			$poss = array();
 			$doublescat = array();
@@ -42,7 +56,6 @@ class Prices {
 				$r = null;
 				if ($pos['producer'] != $price) return $r;
 
-				
 				$name = $rule['catalog'];
 				$pos['pricekey'] = Prices::getHash($pos, $name, $price);
 				
@@ -73,23 +86,11 @@ class Prices {
 			$doublespr = array();
 			$doublesprcount = 0;
 			if ($info) {
-
 				Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$losecat, $price, &$doublespr) {
 					$r = null;
 					$name = $rule['price'];
 
-					if (isset($rule['synonyms'])) {
-						foreach ($rule['synonyms'] as $val => $vals) {
-							if (!empty($pos[$val])) continue;
-							Each::exec($vals, function &($syn) use (&$pos, $val) {
-								$r = null;
-								if (empty($pos[$syn])) return $r;
-								$pos[$val] = $pos[$syn];	
-								$r = false;
-								return $r;
-							});
-						}	
-					}
+					Prices::checkSynonyms($pos, $rule);
 					
 
 					$pos['pricekey'] = Prices::getHash($pos, $name, $price);

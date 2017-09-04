@@ -3,6 +3,7 @@ use infrajs\event\Event;
 use akiyatkin\prices\Prices;
 use infrajs\excel\Xlsx;
 use infrajs\path\Path;
+use infrajs\each\Each;
 
 
 Event::handler('Catalog.oninit', function (&$data) {
@@ -19,6 +20,8 @@ Event::handler('Catalog.oninit', function (&$data) {
 			$key = Prices::getHash($pos, $rule['price'], $dealer);
 			//$id = $dealer.'-'.$key;
 			//$ids[$dealer][$id] = $pos;
+
+
 			$id = $key;
 			$ids[$dealer][$id] = $pos;
 
@@ -35,9 +38,14 @@ Event::handler('Catalog.oninit', function (&$data) {
 		$id = $key;
 
 		if (empty($ids[$dealer][$id])) return $r;
+
+		$price = &$ids[$dealer][$id];
+
+		Prices::checkSynonyms($price, $rule);
+
 		$data = array(
 			'key' => $id,
-			'price' => $ids[$dealer][$id],
+			'price' => $price,
 			'pos' => &$pos
 		);
 		Event::fire('Prices-'.$dealer.'.oninit', $data);
