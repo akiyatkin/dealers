@@ -28,8 +28,9 @@
 		<i>
 			Ошибки - прайс: <b>{~length(losecat)}</b>, каталог: <b>{~length(losepr)}</b>. 
 			Совпадения: <b>{~length(bingo)}</b>. 
-			<a href="/{root}/{price}/doubles">Дубли</a> - прайс: <b>{doublesprcount}</b>, каталог: <b>{doublescatcount}</b>, <a href="/-catalog/check/repeats/{price}">артикул</a>: <b>{repeats}</b>.
-			<a href="/catalog?m=:producer::.{price}=1">Всего</a>: <b>{count}</b>.
+			<br><a href="/{root}/{price}/doubles">Дубли</a> - прайс: <b>{doublesprcount}</b>, каталог: <b>{doublescatcount}</b>, <a href="/-catalog/check/repeats/{price}">артикул</a>: <b>{repeats}</b>.
+			<br><a href="/catalog?m=:producer::.{price}=1">Всего</a>: <b>{count}</b>, 
+			<a href="/catalog?m=:producer::.{price}=1:cost.yes=1">c ценой</a> <b>{pricecount}</b>.
 		</i>
 {PRICE:}
 	<div class="pull-right">Последние изменения: <b>{~date(:y.d.Y H:i,data.time)}</b></div>

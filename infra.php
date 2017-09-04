@@ -16,12 +16,11 @@ Event::handler('Catalog.oninit', function (&$data) {
 			return $obj['key'];
 		};
 
-		Xlsx::runPoss($info['data'], function &(&$pos) use (&$ids, $rule, $dealer) {
+		Xlsx::runPoss($info['data'], function &(&$pos, $i, $group) use (&$ids, $rule, $dealer) {
 			$key = Prices::getHash($pos, $rule['price'], $dealer);
 			//$id = $dealer.'-'.$key;
 			//$ids[$dealer][$id] = $pos;
-
-
+			$pos['path'] = $group['path'];
 			$id = $key;
 			$ids[$dealer][$id] = $pos;
 
@@ -48,6 +47,7 @@ Event::handler('Catalog.oninit', function (&$data) {
 			'price' => $price,
 			'pos' => &$pos
 		);
+		
 		Event::fire('Prices-'.$dealer.'.oninit', $data);
 		$r = null;
 		return $r;

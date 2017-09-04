@@ -52,7 +52,8 @@ class Prices {
 			$poss = array();
 			$doublescat = array();
 			$doublescatcount = 0;
-			Xlsx::runPoss($data, function &($pos) use (&$poss, $price, $rule, &$doublescat, &$doublescatcount) {
+			$pricecount = 0;
+			Xlsx::runPoss($data, function &($pos) use (&$poss, $price, $rule, &$doublescat, &$doublescatcount, &$pricecount) {
 				$r = null;
 				if ($pos['producer'] != $price) return $r;
 
@@ -60,7 +61,9 @@ class Prices {
 				$pos['pricekey'] = Prices::getHash($pos, $name, $price);
 				
 				if (!$pos['pricekey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
-				
+
+				if (!empty($pos['Цена'])) $pricecount++;
+
 				$pos = Catalog::getPos($pos);
 				if (isset($poss[$pos['pricekey']])) {
 					if(!isset($doublescat[$pos['pricekey']])) {
@@ -127,7 +130,7 @@ class Prices {
 			$ans['doublescatcount'] = $doublescatcount;
 			$ans['doublesprcount'] = $doublesprcount;
 			$ans['doublespr'] = $doublespr;
-			
+			$ans['pricecount'] = $pricecount;
 			$ans['losepr'] = $losepr;
 			$ans['price'] = $price;
 
