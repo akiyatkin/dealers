@@ -120,9 +120,15 @@ class Prices {
 					
 					Prices::checkSynonyms($pos, $rule);
 
-					$counts['price']++;
-
+					
 					$pos['pricekey'] = Prices::getHash($pos, $name, $price);
+					if (isset($rule['ignoreart'])) {
+						if(in_array($pos['pricekey'], $rule['ignoreart'])) {
+							return $r;
+						}
+					}
+
+					$counts['price']++;
 					if (!$pos['pricekey']) {
 						$counts['empty']['price']++;
 						return $r;
@@ -171,7 +177,7 @@ class Prices {
 
 
 			$ans['class'] = 'danger';
-			if (!sizeof($ans['losecat'])) {
+			if (!sizeof($ans['losecat']) && sizeof($ans['bingo'])) {
 				$ans['class'] = 'warning';
 				if (!$ans['counts']['doubles']['catalog']
 					&& !$ans['counts']['doubles']['article']
@@ -302,12 +308,31 @@ class Prices {
 	public static function applyRules(&$data, $name)
 	{
 		$rule = Prices::getRule($name);
-		
+
 		foreach ($data as $sheetname => $sheet) {
 			if (in_array($sheetname, $rule['ignore'])) {
 				unset($data[$sheetname]);
-				continue;
 			}
+		}
+
+		if (isset($rule['merge'])) {
+			/* ВОсстаноавливаем значение объеинённых ячеек по высоте в одну строку
+			|  !!!	|  !!!	|		|
+			|		|		|!!!|!!!|
+			*/
+			foreach ($data as $sheetname => $sheet) {
+				foreach ($sheet as $index => $row) {
+					if (sizeof($row)>2) {
+						$data[$sheetname][$index+1] = $data[$sheetname][$index+1] + $data[$sheetname][$index];
+						ksort($data[$sheetname][$index+1]);
+						unset($data[$sheetname][$index]);
+						break;
+					}
+				}
+			}
+		}
+
+		foreach ($data as $sheetname => $sheet) {
 			foreach ($sheet as $i => $row) {
 				if ($i > $rule['start']-1) break;
 				unset($data[$sheetname][$i]);
