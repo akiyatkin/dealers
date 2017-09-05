@@ -56,8 +56,6 @@ return Rest::get( function () {
 			if ( isset(  $images[strtolower($obj['catalog']['article'])] ) )  {
 				unset( $images[ strtolower($obj['catalog']['article'])]);
 			}
-			
-			
 			$key = $obj['catalog']['producer'].'-'.$obj['catalog']['article'];
 			$key = strtolower($key);
 			if (isset($images[$key])) {

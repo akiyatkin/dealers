@@ -25,13 +25,14 @@
 			<li><a href="/{root}/{price}/show">Шапка прайса</a></li>
 		</ul>
 	{priceblock:}
-		<i>
+		<div class="alert alert-{class}">
 			Ошибки - прайс: <b>{~length(losecat)}</b>, каталог: <b>{~length(losepr)}</b>. 
 			Совпадения: <b>{~length(bingo)}</b>. 
-			<br><a href="/{root}/{price}/doubles">Дубли</a> - прайс: <b>{doublesprcount}</b>, каталог: <b>{doublescatcount}</b>, <a href="/-catalog/check/repeats/{price}">артикул</a>: <b>{repeats}</b>.
-			<br><a href="/catalog?m=:producer::.{price}=1">Всего</a>: <b>{count}</b>, 
-			<a href="/catalog?m=:producer::.{price}=1:cost.yes=1">c ценой</a> <b>{pricecount}</b>.
-		</i>
+			<br>Дубли по ключу <a href="/{root}/{price}/doubles">в прайсе</a> <b>{counts.doubles.price}</b>, <a href="/{root}/{price}/doubles">в каталоге</a> <b>{counts.doubles.catalog}</b>, <a href="/-catalog/check/repeats/{price}">по артикулу</a> <b>{counts.doubles.article}</b>.
+			<br>Нет ключа в прайсе <b>{counts.empty.price}</b>, в каталоге <b>{counts.empty.catalog}</b>.
+			<br>Всего в прайсе <b>{counts.price}</b>, <a href="/catalog?m=:producer::.{price}=1">в каталоге</a> <b>{counts.catalog}</b>, 
+			<a href="/catalog?m=:producer::.{price}=1:cost.no=1">без цены</a> <b>{counts.nocost}</b>, без фото <b>{counts.noimages}</b>.
+		</div>
 {PRICE:}
 	<div class="pull-right">Последние изменения: <b>{~date(:y.d.Y H:i,data.time)}</b></div>
 	<h1>Прайс {price}</h1>

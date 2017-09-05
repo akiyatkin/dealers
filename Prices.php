@@ -50,28 +50,53 @@ class Prices {
 			$data = Catalog::init();
 			$rule = Prices::getRule($price);
 			$poss = array();
+
 			$doublescat = array();
-			$doublescatcount = 0;
-			$pricecount = 0;
-			Xlsx::runPoss($data, function &($pos) use (&$poss, $price, $rule, &$doublescat, &$doublescatcount, &$pricecount) {
+
+			$counts = array();
+			$counts['price'] = 0;
+			$counts['empty'] =array();
+			$counts['empty']['price'] = 0;
+			$counts['empty']['catalog'] = 0;
+			$counts['catalog'] = 0;
+			$counts['images'] = 0;
+			$counts['noimages'] = 0;
+			$counts['cost'] = 0;
+			$counts['nocost'] = 0;
+			$counts['doubles'] = array();
+			$counts['doubles']['price'] = 0;
+			$counts['doubles']['catalog'] = 0;
+			$counts['doubles']['article'] = 0;
+
+			
+			Xlsx::runPoss($data, function &($pos) use (&$poss, $price, $rule, &$counts, &$doublescat) {
 				$r = null;
 				if ($pos['producer'] != $price) return $r;
 
 				$name = $rule['catalog'];
 				$pos['pricekey'] = Prices::getHash($pos, $name, $price);
 				
-				if (!$pos['pricekey']) $pos[$name] = 'Нет ключа синхронизации '.$pos['article'];
-
-				if (!empty($pos['Цена'])) $pricecount++;
 
 				$pos = Catalog::getPos($pos);
+				if (empty($pos['images'])) $counts['noimages']++;
+				else $counts['images']++;
+				
+				if (empty($pos['Цена'])) $counts['nocost']++;
+				else $counts['cost']++;
+
+				$counts['catalog']++;
+
+				if (!$pos['pricekey']) {
+					$counts['empty']['catalog']++;
+					return $r;
+				}
+
 				if (isset($poss[$pos['pricekey']])) {
-					if(!isset($doublescat[$pos['pricekey']])) {
+					if (!isset($doublescat[$pos['pricekey']])) {
 						$doublescat[$pos['pricekey']] = array();
 						$doublescat[$pos['pricekey']][] = $poss[$pos['pricekey']];
-						$doublescatcount++;
 					}
-					$doublescatcount++;
+					$counts['doubles']['catalog']++;
 					$doublescat[$pos['pricekey']][] = $pos;
 
 				}
@@ -87,19 +112,28 @@ class Prices {
 			$bingo = array();
 			$losepr = array();
 			$doublespr = array();
-			$doublesprcount = 0;
+			
 			if ($info) {
-				Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$losecat, $price, &$doublespr) {
+				Xlsx::runPoss($info['data'], function &(&$pos) use ($rule, &$poss, &$bingo, &$losecat, $price, &$counts,&$doublespr) {
 					$r = null;
 					$name = $rule['price'];
-
-					Prices::checkSynonyms($pos, $rule);
 					
+					Prices::checkSynonyms($pos, $rule);
+
+					$counts['price']++;
 
 					$pos['pricekey'] = Prices::getHash($pos, $name, $price);
-					if (!$pos['pricekey']) return $r;
+					if (!$pos['pricekey']) {
+						$counts['empty']['price']++;
+						return $r;
+					}
+
+					
+
 					if(empty($doublespr[$pos['pricekey']])) $doublespr[$pos['pricekey']] = array();
 					$doublespr[$pos['pricekey']][] = $pos;
+
+					if (sizeof($doublespr[$pos['pricekey']]) > 1) return $r;
 
 					if (isset($poss[$pos['pricekey']])) {
 						$pos['finded'] = true;
@@ -117,30 +151,51 @@ class Prices {
 				});
 				foreach($doublespr as $k => $v) {
 					if(sizeof($v) < 2) unset($doublespr[$k]);
-					else $doublesprcount += sizeof($v);
+					else $counts['doubles']['price'] += sizeof($v)-1;
 				}
 			}
 			$losepr = array_values($poss);
 			
+			//$counts['catalog2'] = Prices::getCount($price);	
+
 			$ans = Array();
 			$ans['bingo'] = $bingo;
 			$ans['losecat'] = $losecat;
 
+			$ans['counts'] = $counts;
+
 			$ans['doublescat'] = $doublescat;
-			$ans['doublescatcount'] = $doublescatcount;
-			$ans['doublesprcount'] = $doublesprcount;
 			$ans['doublespr'] = $doublespr;
-			$ans['pricecount'] = $pricecount;
 			$ans['losepr'] = $losepr;
 			$ans['price'] = $price;
 
-			$ans['count'] = Prices::getCount($price);	
+
+			$ans['class'] = 'danger';
+			if (!sizeof($ans['losecat'])) {
+				$ans['class'] = 'warning';
+				if (!$ans['counts']['doubles']['catalog']
+					&& !$ans['counts']['doubles']['article']
+					&& !$ans['counts']['noimages']
+					) {
+					$ans['class'] = 'info';
+					if (!$ans['counts']['doubles']['price']
+						//&& !sizeof($ans['losepr'])
+						&& !$ans['counts']['nocost']
+						//&& !$ans['counts']['empty']['price']
+						//&& !$ans['counts']['empty']['catalog']
+						) {
+						$ans['class'] = 'success';
+					}
+				}
+			}
+			
+			
 			$res = Check::repeats();
 			$repeats = 0;
 			if (!empty($res['list'][$price])) {
 				$repeats = sizeof($res['list'][$price]);
 			}
-			$ans['repeats'] = $repeats;
+			$ans['counts']['doubles']['article'] = $repeats;
 			$ans['time'] = time();
 			return $ans;
 		}, array($price), isset($_GET['re']));
