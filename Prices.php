@@ -11,6 +11,7 @@ use infrajs\each\Each;
 use infrajs\template\Template;
 
 class Prices {
+	public static $conf = array();
 	public static $folder = '~.prices/';
 	/*public static function getKey(&$pos, $name)
 	{

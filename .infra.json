@@ -1,4 +1,6 @@
 {
 	"dependencies":["index"],
+	"costlimit":300000,
+	"conf":"akiyatkin\\prices\\Prices",
 	"require":"infra.php"
 }

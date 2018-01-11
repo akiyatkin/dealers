@@ -49,6 +49,10 @@ Event::handler('Catalog.oninit', function (&$data) {
 		);
 		
 		Event::fire('Prices-'.$dealer.'.oninit', $data);
+		
+		if (isset($data['pos']['Цена']) && $data['pos']['Цена'] > Prices::$conf['costlimit']) {
+			unset($data['pos']['Цена']);
+		}
 		$r = null;
 		return $r;
 	});
