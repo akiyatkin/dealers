@@ -47,7 +47,7 @@ class Prices {
 	}
 	public static function init($price) 
 	{
-		return Catalog::cache(__FILE__, function ($price) {
+		return Catalog::cache('Прайсы', function ($price) {
 			$data = Catalog::init();
 			$rule = Prices::getRule($price);
 			$poss = array();
@@ -208,7 +208,7 @@ class Prices {
 		}, array($price), isset($_GET['re']));
 	}
 	public static function getCount($price) {
-		return Catalog::cache(__FILE__.'getCount', function ($price) {
+		return Catalog::cache('Количество позиций', function ($price) {
 			//Создали метку, установили ключ и получили данные
 			$mark = Catalog::getDefaultMark();
 			$mark->setVal(':producer::.'.$price.'=1');
