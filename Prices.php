@@ -47,7 +47,8 @@ class Prices {
 	}
 	public static function init($price) 
 	{
-		return Catalog::cache('Прайсы', function ($price) {
+		//Прайсы
+		return Catalog::cache( function ($price) {
 			$data = Catalog::init();
 			$rule = Prices::getRule($price);
 			$poss = array();
@@ -205,10 +206,11 @@ class Prices {
 			$ans['counts']['doubles']['article'] = $repeats;
 			$ans['time'] = time();
 			return $ans;
-		}, array($price), isset($_GET['re']));
+		}, array($price));
 	}
 	public static function getCount($price) {
-		return Catalog::cache('Количество позиций', function ($price) {
+		//Количество позиций
+		return Catalog::cache( function ($price) {
 			//Создали метку, установили ключ и получили данные
 			$mark = Catalog::getDefaultMark();
 			$mark->setVal(':producer::.'.$price.'=1');
