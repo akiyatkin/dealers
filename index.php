@@ -29,7 +29,7 @@ Amatek
 В формает понятном для клиента.
 
 */
-Access::debug(true); //Запрещает доступ если нет отладочного режима.
+Access::test(true); //Запрещает доступ если нет отладочного режима.
 
 return Rest::get( function () {
 		$prices = array();
