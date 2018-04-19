@@ -3,6 +3,7 @@ namespace akiyatkin\prices;
 use infrajs\excel\Xlsx;
 use infrajs\ans\Ans;
 use infrajs\path\Path;
+use akiyatkin\fs\FS;
 use infrajs\once\Once;
 use infrajs\load\Load;
 use infrajs\catalog\check\Check;
@@ -228,6 +229,7 @@ class Prices {
 	{
 		return Once::exec(__FILE__.'getList', function () {
 			$list = array();
+			if(!FS::is_dir(Prices::$folder)) return $list;
 			array_map(function ($file) use (&$list) {
 			
 				if ($file[0] == '.') return;
