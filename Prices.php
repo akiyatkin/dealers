@@ -53,7 +53,6 @@ class Prices {
 			$data = Catalog::init();
 			$rule = Prices::getRule($price);
 			$poss = array();
-
 			$doublescat = array();
 
 			$counts = array();
@@ -198,7 +197,6 @@ class Prices {
 				}
 			}
 			
-			
 			$res = Check::repeats();
 			$repeats = 0;
 			if (!empty($res['list'][$price])) {
@@ -227,7 +225,7 @@ class Prices {
 	 **/
 	public static function getList()
 	{
-		return Once::exec(__FILE__.'getList', function () {
+		return Once::func( function () {
 			$list = array();
 			if(!FS::is_dir(Prices::$folder)) return $list;
 			array_map(function ($file) use (&$list) {
