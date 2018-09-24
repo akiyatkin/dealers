@@ -60,7 +60,7 @@
 			{losecat::list-losecat}
 		</ul>
 		{list-losecat:}
-			<li>{price.pricekey}</li>
+			<li><span class="a" onclick="$(this).next().slideToggle()">{price.pricekey}</span><div style="display:none">{~print(price)}</div></li>
 	{showcaterror:}
 		<h2>Ошибки каталога</h2>
 		<i>Найдены позиции только в каталоге - <b>{~length(losepr)}</b></i>
