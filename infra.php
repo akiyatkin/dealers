@@ -40,6 +40,8 @@ Event::handler('Catalog.oninit', function (&$data) {
 		$id = $key;
 
 		if (empty($ids[$prod][$id])) return $r;
+		
+		$pos['prices'] = true; //Метка, что позиция найдена в прайсе
 
 		$price = &$ids[$prod][$id];
 		$data = array(

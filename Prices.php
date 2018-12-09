@@ -221,7 +221,7 @@ class Prices {
 		
 	}
 	/**
-	 * Массив дилеров в формает fd (nameInfo) с необработанными данными из Excel (data)
+	 * Массив поставщиков в формает fd (nameInfo) с необработанными данными из Excel (data)
 	 **/
 	public static function getList()
 	{
