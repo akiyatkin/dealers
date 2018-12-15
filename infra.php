@@ -7,7 +7,6 @@ use infrajs\each\Each;
 
 Path::reqif('~prices.php');
 Event::handler('Catalog.oninit', function (&$data) {
-	
 	$list = Prices::getList();
 	$ids = array();
 	foreach ($list as $prod => $info) {
@@ -38,7 +37,6 @@ Event::handler('Catalog.oninit', function (&$data) {
 		$rule = Prices::getRule($prod);
 		$key = Prices::getHash($pos, $rule['catalog'], $prod);
 		$id = $key;
-
 		if (empty($ids[$prod][$id])) return $r;
 		
 		$pos['prices'] = true; //Метка, что позиция найдена в прайсе
@@ -51,7 +49,6 @@ Event::handler('Catalog.oninit', function (&$data) {
 		);
 
 		
-
 		Event::fire('Prices-'.$prod.'.oninit', $data);
 		if (!isset($data['pos']['Цена'])){
 			if (isset($data['pos']['Цена оптовая'])) $data['pos']['Цена'] = $data['pos']['Цена оптовая'];
@@ -61,7 +58,5 @@ Event::handler('Catalog.oninit', function (&$data) {
 		$r = null;
 		return $r;
 	});
-	//echo '<pre>';
-	//print_r($data);
 }, 'prices');
 

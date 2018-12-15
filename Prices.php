@@ -25,10 +25,10 @@ class Prices {
 		return Path::encode($pos[$name]);
 		//return str_replace(["\n","\r"," ", "\t",'.',',','%','(',')','-','‐'], '', $pos[$name]); 
 	}*/
-	public static function getHash(&$pos, $name, $price)
+	public static function getHash(&$pos, $name, $prod = '')
 	{
 		$hash = Template::parse(array($name), $pos);
-		$hash = preg_replace('/^'.$price.'\-/i', '', $hash);
+		if ($prod) $hash = preg_replace('/^'.$prod.'\-/i', '', $hash);
 		return $hash;
 	}
 	public static function checkSynonyms(&$pos, $rule) 
