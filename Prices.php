@@ -325,7 +325,8 @@ class Prices {
 			*/
 			foreach ($data as $sheetname => $sheet) {
 				foreach ($sheet as $index => $row) {
-					if (sizeof($row)>2) {
+					
+					if (sizeof($row)>2 && isset($data[$sheetname][$index+1])) {
 						$data[$sheetname][$index+1] = $data[$sheetname][$index+1] + $data[$sheetname][$index];
 						ksort($data[$sheetname][$index+1]);
 						unset($data[$sheetname][$index]);
@@ -334,6 +335,7 @@ class Prices {
 				}
 			}
 		}
+
 
 		foreach ($data as $sheetname => $sheet) {
 			foreach ($sheet as $i => $row) {
