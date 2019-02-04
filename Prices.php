@@ -73,12 +73,10 @@ class Prices {
 			
 			Xlsx::runPoss($data, function &($pos) use (&$poss, $price, $rule, &$counts, &$doublescat) {
 				$r = null;
-				if ($pos['producer'] != $price) return $r;
+				if ($rule['producer'] && $pos['producer'] != $rule['producer']) return $r;
 
 				$name = $rule['catalog'];
 				$pos['pricekey'] = Prices::getHash($pos, $name, $price);
-				
-
 				$pos = Catalog::getPos($pos);
 				if (empty($pos['images'])) $counts['noimages']++;
 				else $counts['images']++;
@@ -256,16 +254,25 @@ class Prices {
 		});
 		
 	}
-	public static function getRule($name) 
+	public static function getRule($name = false) 
 	{
 		$rules = Load::loadJSON('~prices.json');
+		if (!$name) foreach ($rules as $k => $rule) if (isset($rule['producer']) && !$rule['producer']) {
+			$name = $k;
+			break;
+		}
 		$rule = isset($rules[$name])? $rules[$name]: array();
 
-		if (!isset($rule['start'])) $rule['start'] = 1;
-		if (!isset($rule['head'])) $rule['head'] = false;
-		if (!isset($rule['ignore'])) $rule['ignore'] = [];
-		if (!isset($rule['price'])) $rule['price'] = '{Артикул}';
-		if (!isset($rule['catalog'])) $rule['catalog'] = '{Артикул}';
+		$def = array(
+			'start' => 1,
+			'name' => $name,
+			'producer' => $name,
+			'head' => false,
+			'ignore' => [],
+			'price' => '{Артикул}',
+			'catalog' => '{Артикул}'
+		);
+		$rule = array_merge($def, $rule);
 
 		return $rule;
 	}

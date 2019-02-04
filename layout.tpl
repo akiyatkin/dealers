@@ -6,9 +6,10 @@
 		{prices::head}
 	</ul>
 	{head:}
-		<li><a href="/{root}/{~key}">{~key}</a><br>
+		<li><a href="/{root}/{~key}">{~key}{producer??:grule}</a><br>
 			{data:priceblock}
 		</li>
+	{grule:} - <i>прайс для всего каталога</i>
 {DOUBLES:}
 	<div class="pull-right">Последние изменения: <b>{~date(:y.d.Y H:i,data.time)}</b></div>
 	<h1>Дубли прайса {price}</h1>

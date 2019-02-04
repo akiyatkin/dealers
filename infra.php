@@ -9,9 +9,12 @@ Path::reqif('~prices.php');
 Event::handler('Catalog.oninit', function (&$data) {
 	$list = Prices::getList();
 	$ids = array();
+	
+
 	foreach ($list as $prod => $info) {
 		$ids[$prod] = array();
 		$rule = Prices::getRule($prod);
+
 		Event::$classes['Prices-'.$prod] = function (&$obj) {
 			return $obj['key'];
 		};
@@ -19,42 +22,57 @@ Event::handler('Catalog.oninit', function (&$data) {
 		Xlsx::runPoss($info['data'], function &(&$pos, $i, $group) use (&$ids, $rule, $prod) {
 			Prices::checkSynonyms($pos, $rule);
 			$key = Prices::getHash($pos, $rule['price'], $prod);
-			//$id = $prod.'-'.$key;
-			//$ids[$prod][$id] = $pos;
 			$pos['path'] = $group['path'];
 			$id = $key;
-			$ids[$prod][$id] = $pos;
-
-			$r = null;
-			return $r;
+			$ids[$rule['producer']][$id] = $pos;
+			
+			$r = null; return $r;
 		});
 		
 	};
-
-	Xlsx::runPoss($data, function &(&$pos) use ($ids) {
+	$grule = Prices::getRule();
+	Xlsx::runPoss($data, function &(&$pos) use ($ids, $grule) {
 		$r = null;
 		$prod = $pos['producer'];
 		$rule = Prices::getRule($prod);
+
 		$key = Prices::getHash($pos, $rule['catalog'], $prod);
-		$id = $key;
-		if (empty($ids[$prod][$id])) return $r;
-		
-		$pos['prices'] = true; //Метка, что позиция найдена в прайсе
+		$gkey = Prices::getHash($pos, $grule['catalog']);
 
-		$price = &$ids[$prod][$id];
-		$data = array(
-			'key' => $id,
-			'price' => $price,
-			'pos' => &$pos
-		);
+		if (isset($ids[$prod][$key])) {
+			$pos['prices'] = true; //Метка, что позиция найдена в прайсе
 
-		
-		Event::fire('Prices-'.$prod.'.oninit', $data);
-		if (!isset($data['pos']['Цена'])){
-			if (isset($data['pos']['Цена оптовая'])) $data['pos']['Цена'] = $data['pos']['Цена оптовая'];
-			if (isset($data['pos']['Цена розничная'])) $data['pos']['Цена'] = $data['pos']['Цена розничная'];
+			$price = &$ids[$prod][$key];
+			$data = array(
+				'key' => $key,
+				'price' => $price,
+				'pos' => &$pos
+			);
+
+			
+			Event::fire('Prices-'.$prod.'.oninit', $data);
+			if (!isset($data['pos']['Цена'])){
+				if (isset($data['pos']['Цена оптовая'])) $data['pos']['Цена'] = $data['pos']['Цена оптовая'];
+				if (isset($data['pos']['Цена розничная'])) $data['pos']['Цена'] = $data['pos']['Цена розничная'];
+			}
 		}
-		
+		if (isset($ids[$grule['producer']][$gkey])) {
+			$pos['prices'] = true; //Метка, что позиция найдена в прайсе
+
+			$price = &$ids[$grule['producer']][$gkey];
+			$data = array(
+				'key' => $key,
+				'price' => $price,
+				'pos' => &$pos
+			);
+
+			
+			Event::fire('Prices-'.$grule['name'].'.oninit', $data);
+			if (!isset($data['pos']['Цена'])){
+				if (isset($data['pos']['Цена оптовая'])) $data['pos']['Цена'] = $data['pos']['Цена оптовая'];
+				if (isset($data['pos']['Цена розничная'])) $data['pos']['Цена'] = $data['pos']['Цена розничная'];
+			}
+		}
 		$r = null;
 		return $r;
 	});
