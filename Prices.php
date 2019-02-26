@@ -257,6 +257,7 @@ class Prices {
 	public static function getRule($name = false) 
 	{
 		$rules = Load::loadJSON('~prices.json');
+		if(!$rules) $rules = array();
 		if (!$name) foreach ($rules as $k => $rule) if (isset($rule['producer']) && !$rule['producer']) {
 			$name = $k;
 			break;
